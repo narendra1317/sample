@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aberdeen Castle AR Experience</title>
+    
+    <!-- Google Model Viewer -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: var(--color-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: var(--space-20) var(--space-16);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            color: var(--color-teal-300);
+            font-size: var(--font-size-3xl);
+            margin-bottom: var(--space-8);
+            text-align: center;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            font-size: var(--font-size-md);
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: var(--space-16);
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .viewer-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: var(--space-16);
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 500px;
+            background-color: #1a1a2e;
+        }
+
+        model-viewer::part(default-ar-button) {
+            background-color: var(--color-teal-300);
+            color: var(--color-slate-900);
+            border-radius: var(--radius-base);
+            padding: var(--space-12) var(--space-24);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-base);
+        }
+
+        .controls-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            padding: var(--space-20);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: var(--space-16);
+        }
+
+        .controls-card h2 {
+            color: var(--color-teal-300);
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--space-16);
+        }
+
+        .control-group {
+            margin-bottom: var(--space-20);
+        }
+
+        .control-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: var(--font-weight-medium);
+            margin-bottom: var(--space-8);
+            font-size: var(--font-size-sm);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: var(--space-12);
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--color-teal-300);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--color-teal-300);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .value-display {
+            min-width: 50px;
+            text-align: right;
+            color: var(--color-teal-300);
+            font-weight: var(--font-weight-semibold);
+            font-size: var(--font-size-sm);
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-12);
+            margin-bottom: var(--space-16);
+        }
+
+        .btn {
+            padding: var(--space-12) var(--space-16);
+            border: none;
+            border-radius: var(--radius-base);
+            font-weight: var(--font-weight-medium);
+            font-size: var(--font-size-sm);
+            cursor: pointer;
+            transition: all var(--duration-fast) var(--ease-standard);
+            background: rgba(50, 184, 198, 0.2);
+            color: var(--color-teal-300);
+            border: 1px solid var(--color-teal-300);
+        }
+
+        .btn:hover {
+            background: var(--color-teal-300);
+            color: var(--color-slate-900);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(50, 184, 198, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .info-card {
+            background: rgba(45, 166, 178, 0.1);
+            border: 1px solid var(--color-teal-400);
+            border-radius: var(--radius-lg);
+            padding: var(--space-16);
+            margin-bottom: var(--space-16);
+        }
+
+        .info-card h3 {
+            color: var(--color-teal-300);
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--space-12);
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+        }
+
+        .info-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-card li {
+            color: rgba(255, 255, 255, 0.8);
+            padding: var(--space-6) 0;
+            padding-left: var(--space-20);
+            position: relative;
+            font-size: var(--font-size-sm);
+            line-height: 1.6;
+        }
+
+        .info-card li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--color-teal-300);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--space-12);
+            margin-top: var(--space-16);
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: var(--space-12);
+            border-radius: var(--radius-base);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-box .label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: var(--font-size-xs);
+            margin-bottom: var(--space-4);
+        }
+
+        .stat-box .value {
+            color: var(--color-teal-300);
+            font-size: var(--font-size-lg);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .footer {
+            text-align: center;
+            padding: var(--space-20);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: var(--font-size-sm);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            model-viewer {
+                height: 400px;
+            }
+
+            .header h1 {
+                font-size: var(--font-size-2xl);
+            }
+
+            .button-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏰 Aberdeen Castle AR Experience</h1>
+        <p>Interactive 3D Visualization &amp; Augmented Reality Demo</p>
+    </div>
+
+    <div class="container">
+        <div class="info-card">
+            <h3>📱 How to Experience in AR</h3>
+            <ul>
+                <li><strong>On Mobile:</strong> Tap the "View in AR" button below the model</li>
+                <li><strong>iOS (Safari):</strong> Opens AR Quick Look - place castle in your space</li>
+                <li><strong>Android (Chrome):</strong> Uses WebXR or Scene Viewer for AR placement</li>
+                <li><strong>Desktop:</strong> Interact with 3D model using mouse controls</li>
+            </ul>
+        </div>
+
+        <div class="viewer-container">
+            <model-viewer 
+                id="castle-viewer"
+                src="sample.glb"
+                ios-src=""
+                alt="Aberdeen Castle 3D Model"
+                ar
+                ar-modes="webxr scene-viewer quick-look"
+                ar-scale="auto"
+                camera-controls
+                touch-action="pan-y"
+                auto-rotate
+                auto-rotate-delay="0"
+                rotation-per-second="30deg"
+                shadow-intensity="1"
+                camera-orbit="45deg 75deg 2.5m"
+                min-camera-orbit="auto auto 1m"
+                max-camera-orbit="auto auto 10m"
+                interpolation-decay="200"
+                exposure="1"
+                environment-image="neutral">
+                
+                <button slot="ar-button" class="btn" style="position: absolute; bottom: 16px; right: 16px;">
+                    📱 View in AR
+                </button>
+                
+                <div class="progress-bar" slot="progress-bar">
+                    <div class="update-bar"></div>
+                </div>
+            </model-viewer>
+        </div>
+
+        <div class="controls-card">
+            <h2>🎮 Interactive Controls</h2>
+            
+            <div class="button-group">
+                <button class="btn" onclick="resetView()">🔄 Reset View</button>
+                <button class="btn" onclick="toggleRotation()">⏯️ Toggle Rotation</button>
+                <button class="btn" onclick="topView()">⬆️ Top View</button>
+                <button class="btn" onclick="sideView()">➡️ Side View</button>
+            </div>
+
+            <div class="control-group">
+                <label for="rotation-speed">Rotation Speed</label>
+                <div class="slider-container">
+                    <input type="range" id="rotation-speed" min="0" max="180" value="30" step="10">
+                    <span class="value-display" id="rotation-value">30°/s</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="exposure">Brightness / Exposure</label>
+                <div class="slider-container">
+                    <input type="range" id="exposure" min="0.1" max="2" value="1" step="0.1">
+                    <span class="value-display" id="exposure-value">1.0</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="zoom-level">Camera Distance</label>
+                <div class="slider-container">
+                    <input type="range" id="zoom-level" min="1" max="10" value="2.5" step="0.1">
+                    <span class="value-display" id="zoom-value">2.5m</span>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="label">Current Rotation</div>
+                    <div class="value" id="current-rotation">45°</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Camera Angle</div>
+                    <div class="value" id="camera-angle">75°</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Model Status</div>
+                    <div class="value" id="model-status">Ready</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <h3>✨ Tourism Value Proposition</h3>
+            <ul>
+                <li><strong>Immersive Preview:</strong> Tourists can visualize Aberdeen's heritage before visiting</li>
+                <li><strong>Interactive Education:</strong> 360° exploration reveals architectural details</li>
+                <li><strong>Social Sharing:</strong> AR screenshots create viral marketing content</li>
+                <li><strong>Accessibility:</strong> Works on any modern smartphone without app downloads</li>
+                <li><strong>Scale Demonstration:</strong> AR shows actual castle dimensions in real space</li>
+            </ul>
+        </div>
+
+        <div class="controls-card">
+            <h2>🔧 Model Configuration</h2>
+            <div style="color: rgba(255, 255, 255, 0.8); line-height: 1.8; font-size: var(--font-size-sm);">
+                <p style="margin-bottom: var(--space-12);"><strong>Active Model:</strong> sample.glb</p>
+                <ol style="padding-left: var(--space-20); margin-bottom: var(--space-16);">
+                    <li style="margin-bottom: var(--space-8);">Export your castle as <strong>GLB</strong> or <strong>GLTF</strong> format</li>
+                    <li style="margin-bottom: var(--space-8);">Host the file on a CDN (Bunny.net, Firebase Storage, or GitHub)</li>
+                    <li style="margin-bottom: var(--space-8);">Replace the <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 3px;">src</code> URL in the code with your model's URL</li>
+                    <li style="margin-bottom: var(--space-8);">For iOS users: Export an <strong>USDZ</strong> version and add to <code style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 3px;">ios-src</code></li>
+                </ol>
+                <p style="margin-bottom: var(--space-8);"><strong>Optimization Tips:</strong></p>
+                <ul style="padding-left: var(--space-20); list-style: disc;">
+                    <li style="margin-bottom: var(--space-4);">Keep file size under 10MB for fast loading</li>
+                    <li style="margin-bottom: var(--space-4);">Use texture compression (Draco for geometry, KTX2 for textures)</li>
+                    <li style="margin-bottom: var(--space-4);">Test on both iOS and Android devices</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Developed for Aberdeen Tourism Initiative | Powered by Google Model-Viewer
+    </div>
+
+    <script>
+        const modelViewer = document.querySelector('#castle-viewer');
+        let isRotating = true;
+
+        // Update rotation speed
+        document.getElementById('rotation-speed').addEventListener('input', (e) => {
+            const speed = e.target.value;
+            document.getElementById('rotation-value').textContent = `${speed}°/s`;
+            modelViewer.setAttribute('rotation-per-second', `${speed}deg`);
+        });
+
+        // Update exposure
+        document.getElementById('exposure').addEventListener('input', (e) => {
+            const exposure = e.target.value;
+            document.getElementById('exposure-value').textContent = exposure;
+            modelViewer.exposure = exposure;
+        });
+
+        // Update zoom
+        document.getElementById('zoom-level').addEventListener('input', (e) => {
+            const distance = e.target.value;
+            document.getElementById('zoom-value').textContent = `${distance}m`;
+            const currentOrbit = modelViewer.getCameraOrbit();
+            modelViewer.cameraOrbit = `${currentOrbit.theta}rad ${currentOrbit.phi}rad ${distance}m`;
+        });
+
+        // Reset view
+        function resetView() {
+            modelViewer.cameraOrbit = '45deg 75deg 2.5m';
+            modelViewer.exposure = 1;
+            document.getElementById('zoom-level').value = 2.5;
+            document.getElementById('zoom-value').textContent = '2.5m';
+            document.getElementById('exposure').value = 1;
+            document.getElementById('exposure-value').textContent = '1.0';
+        }
+
+        // Toggle rotation
+        function toggleRotation() {
+            isRotating = !isRotating;
+            if (isRotating) {
+                modelViewer.autoRotate = true;
+            } else {
+                modelViewer.autoRotate = false;
+            }
+        }
+
+        // Top view
+        function topView() {
+            modelViewer.cameraOrbit = '0deg 0deg 3m';
+        }
+
+        // Side view
+        function sideView() {
+            modelViewer.cameraOrbit = '90deg 90deg 3m';
+        }
+
+        // Update stats in real-time
+        modelViewer.addEventListener('camera-change', () => {
+            const orbit = modelViewer.getCameraOrbit();
+            const theta = Math.round(orbit.theta * (180 / Math.PI));
+            const phi = Math.round(orbit.phi * (180 / Math.PI));
+            
+            document.getElementById('current-rotation').textContent = `${theta}°`;
+            document.getElementById('camera-angle').textContent = `${phi}°`;
+        });
+
+        // Model loading status
+        modelViewer.addEventListener('load', () => {
+            document.getElementById('model-status').textContent = 'Loaded';
+        });
+
+        modelViewer.addEventListener('error', () => {
+            document.getElementById('model-status').textContent = 'Error';
+        });
+
+        // Show AR status
+        modelViewer.addEventListener('ar-status', (event) => {
+            if (event.detail.status === 'session-started') {
+                console.log('AR session started');
+            }
+        });
+    </script>
+</body>
+</html>
+
