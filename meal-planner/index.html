@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2D6A3B">
+</head>
+<body>
+<title>Vantillu Kitchen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Tammudu+2:wght@500;600;700;800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#F3F5EC; --surface:#FFFFFF; --surface-2:#EAEFE0; --ink:#1B261D; --muted:#5B6A5D; --line:#D6DDCB;
+  --leaf:#2D6A3B; --leaf-hover:#245631; --leaf-ink:#FFFFFF; --leaf-soft:#DDEBD9;
+  --turmeric:#C98A0E; --turmeric-soft:#F7E8C2; --chilli:#B8352A; --chilli-soft:#F7DDD8;
+  --tile:#E8EEDD; --tile-warm:#F5EBD1; --tile-cool:#E3ECEA; --shadow:0 1px 2px rgba(27,38,29,.06),0 6px 18px rgba(27,38,29,.07);
+  --display:"Baloo Tammudu 2","Nirmala UI","Gautami",system-ui,sans-serif;
+  --body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F1511; --surface:#171F19; --surface-2:#1F2921; --ink:#E6ECE3; --muted:#9AA99C; --line:#2B372D;
+    --leaf:#72C184; --leaf-hover:#8ED29E; --leaf-ink:#0F1511; --leaf-soft:#1F3525;
+    --turmeric:#E7B447; --turmeric-soft:#3A2F14; --chilli:#E46E61; --chilli-soft:#3B1E1A;
+    --tile:#223026; --tile-warm:#342D1D; --tile-cool:#1E2D2B; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1511; --surface:#171F19; --surface-2:#1F2921; --ink:#E6ECE3; --muted:#9AA99C; --line:#2B372D;
+  --leaf:#72C184; --leaf-hover:#8ED29E; --leaf-ink:#0F1511; --leaf-soft:#1F3525;
+  --turmeric:#E7B447; --turmeric-soft:#3A2F14; --chilli:#E46E61; --chilli-soft:#3B1E1A;
+  --tile:#223026; --tile-warm:#342D1D; --tile-cool:#1E2D2B; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;margin:0;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2.5px solid var(--turmeric);outline-offset:2px;border-radius:6px}
+.te{font-family:var(--display);font-weight:600;color:var(--muted);letter-spacing:.01em}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+
+/* shell */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1180px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:8px;margin-right:auto}
+.brand h1{font-size:28px;font-weight:800;color:var(--leaf);letter-spacing:-.01em}
+.brand .te{font-size:17px}
+.people{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.sync.on i{background:var(--leaf)}
+.tabs{display:flex;gap:4px}
+.tab{border:0;background:transparent;padding:8px 12px;border-radius:999px;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:6px}
+.tab svg{width:18px;height:18px}
+.tab[aria-current="page"]{background:var(--leaf);color:var(--leaf-ink)}
+.tab:not([aria-current="page"]):hover{background:var(--surface-2);color:var(--ink)}
+.tab .badge{background:var(--chilli);color:#fff;border-radius:999px;font-size:11px;padding:0 6px;line-height:17px}
+main{max-width:1180px;margin:0 auto;padding:18px 16px 110px}
+@media (max-width:760px){
+  .top{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
+  .top .tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);justify-content:space-around;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+  .tab{flex-direction:column;gap:2px;font-size:11px;padding:6px 8px;border-radius:12px;position:relative}
+  .tab .badge{position:absolute;top:0;right:4px}
+  .brand h1{font-size:24px}
+  .sync span{display:none}
+}
+
+/* shared bits */
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{justify-content:space-between}
+.section-h{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:6px 0 14px}
+.section-h h2{font-size:30px;font-weight:700}
+.section-h p{margin:2px 0 0;color:var(--muted);max-width:60ch}
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--leaf)}
+.btn.primary{background:var(--leaf);color:var(--leaf-ink);border-color:var(--leaf)}
+.btn.primary:hover{background:var(--leaf-hover)}
+.btn.warn{color:var(--chilli);border-color:color-mix(in srgb,var(--chilli) 40%,var(--line))}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+.btn svg{width:16px;height:16px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--muted)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;letter-spacing:.02em;white-space:nowrap}
+.pill.ok{background:var(--leaf-soft);color:var(--leaf)}
+.pill.soon{background:var(--turmeric-soft);color:var(--turmeric)}
+.pill.bad{background:var(--chilli-soft);color:var(--chilli)}
+.pill.plain{background:var(--surface-2);color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.stepper button{border:0;background:transparent;width:32px;height:32px;font-size:18px;font-weight:600;color:var(--leaf)}
+.stepper button:hover{background:var(--surface-2)}
+.stepper span{min-width:62px;text-align:center;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+.search{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px;min-width:0;width:100%;max-width:280px}
+.banner{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--turmeric-soft);border:1px solid color-mix(in srgb,var(--turmeric) 35%,transparent);padding:10px 14px;border-radius:12px;margin-bottom:16px;font-size:14px}
+
+/* art */
+.ic{display:inline-grid;place-items:center;border-radius:50%;background:var(--tile);flex:none}
+.ic.warm{background:var(--tile-warm)} .ic.cool{background:var(--tile-cool)}
+.ic svg{width:78%;height:78%;display:block}
+.ic.s24{width:24px;height:24px}.ic.s32{width:32px;height:32px}.ic.s40{width:40px;height:40px}.ic.s56{width:56px;height:56px}.ic.s72{width:72px;height:72px}
+.collage{display:flex;align-items:center}
+.collage .ic{border:2.5px solid var(--surface)}
+.collage .ic+.ic{margin-left:-14px}
+.collage.big .ic+.ic{margin-left:-20px}
+.collage.xs .ic+.ic{margin-left:-9px}
+.collage.xs .ic{border-width:1.5px}
+
+/* day strip */
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:18px}
+.day{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 4px;text-align:center;line-height:1.1}
+.day b{display:block;font-family:var(--display);font-size:22px;font-weight:700}
+.day small{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.day .dots{display:flex;gap:3px;justify-content:center;margin-top:5px}
+.day .dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.day .dots i.p{background:var(--turmeric)} .day .dots i.c{background:var(--leaf)}
+.day[aria-pressed="true"]{background:var(--leaf);border-color:var(--leaf);color:var(--leaf-ink)}
+.day[aria-pressed="true"] small{color:inherit;opacity:.8}
+.day[aria-pressed="true"] .dots i{background:color-mix(in srgb,var(--leaf-ink) 35%,transparent)}
+.day[aria-pressed="true"] .dots i.p,.day[aria-pressed="true"] .dots i.c{background:var(--leaf-ink)}
+.day.today:not([aria-pressed="true"]){border-color:var(--leaf);border-width:2px}
+
+/* today */
+.today-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+@media (max-width:900px){.today-grid{grid-template-columns:1fr}}
+.meal{padding:16px;display:grid;gap:12px}
+.meal+.meal{margin-top:14px}
+.meal-h{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.meal-h h3{font-size:22px;font-weight:700}
+.meal.done{background:color-mix(in srgb,var(--leaf-soft) 55%,var(--surface))}
+.dish-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px;border-radius:12px;background:var(--surface-2)}
+.dish-row h4{margin:0;font-size:16px;font-weight:700}
+.dish-row .te{font-size:14px}
+.ing-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ing-tag{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;padding:2px 8px 2px 2px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.ing-tag.short{border-color:color-mix(in srgb,var(--chilli) 50%,var(--line));color:var(--chilli)}
+details.method{font-size:14px;color:var(--muted)}
+details.method summary{cursor:pointer;font-weight:600;color:var(--leaf);font-size:13px}
+details.method p{margin:6px 0 0;max-width:65ch}
+.empty-slot{border:1.5px dashed var(--line);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);flex-wrap:wrap}
+.side h3{font-size:19px;margin-bottom:10px}
+.side .card{padding:14px}
+.side .card+.card{margin-top:14px}
+.soon-item{display:flex;align-items:center;gap:10px;padding:6px 0}
+.soon-item+.soon-item{border-top:1px solid var(--line)}
+.soon-item .grow{flex:1;min-width:0}
+
+/* week */
+.week-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.week-bar .range{font-family:var(--display);font-size:20px;font-weight:700;min-width:170px;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.stat{padding:12px 14px}
+.stat b{font-family:var(--display);font-size:26px;font-weight:700;display:block;line-height:1.1}
+@media (max-width:700px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.week{display:grid;grid-template-columns:88px repeat(7,minmax(0,1fr));gap:6px}
+.week .wh{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:4px 6px}
+.week .wh.today{color:var(--leaf)}
+.week .wh b{display:block;font-family:var(--display);font-size:20px;color:var(--ink);letter-spacing:0}
+.week .wh.today b{color:var(--leaf)}
+.week .sl{font-family:var(--display);font-weight:700;font-size:15px;padding:8px 4px;color:var(--muted)}
+.cell{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px;display:flex;flex-direction:column;gap:5px;min-height:96px}
+.cell.past{opacity:.6}
+.cell.cooked{background:color-mix(in srgb,var(--leaf-soft) 60%,var(--surface))}
+.dchip{display:flex;align-items:center;gap:6px;border-radius:9px;background:var(--surface-2);padding:3px 4px 3px 3px;font-size:12.5px;font-weight:600;line-height:1.15}
+.dchip .n{flex:1;min-width:0;overflow-wrap:break-word;hyphens:auto;text-align:left;border:0;background:transparent;padding:0}
+.dchip .x{border:0;background:transparent;color:var(--muted);width:20px;height:20px;border-radius:6px;font-size:14px;line-height:1;flex:none}
+.dchip .x:hover{background:var(--chilli-soft);color:var(--chilli)}
+.add{border:1.5px dashed var(--line);background:transparent;border-radius:9px;color:var(--muted);font-size:12.5px;font-weight:600;padding:4px;margin-top:auto}
+.add:hover{border-color:var(--leaf);color:var(--leaf)}
+@media (max-width:900px){
+  .week{display:flex;flex-direction:column;gap:12px}
+  .week .wh,.week .sl,.week .corner{display:none}
+  .wday{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px}
+  .wday-h{display:flex;align-items:baseline;gap:8px}
+  .wday-h b{font-family:var(--display);font-size:20px}
+  .wday .cell{border:0;background:var(--surface-2);min-height:0}
+  .wday .cell .lbl{display:block}
+}
+@media (min-width:901px){.wday{display:contents}.wday-h{display:none}.cell .lbl{display:none}}
+.cell .lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* shop */
+.shop-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media (max-width:900px){.shop-grid{grid-template-columns:1fr}}
+.store{padding:6px 14px 10px}
+.store+.store{margin-top:14px}
+.store-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.store-h h3{font-size:20px}
+.item{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0}
+.item+.item{border-top:1px solid var(--line)}
+.item .nm{font-weight:700}
+.item .why{font-size:12.5px;color:var(--muted)}
+.item .amt{text-align:right;font-size:13px}
+.item .amt b{display:block;font-size:15px}
+.item.got .nm,.item.got .amt b{text-decoration:line-through;color:var(--muted)}
+.tick{appearance:none;-webkit-appearance:none;width:24px;height:24px;border:2px solid var(--line);border-radius:7px;background:var(--surface);display:grid;place-items:center;margin:0;cursor:pointer}
+.tick:checked{background:var(--leaf);border-color:var(--leaf)}
+.tick:checked::after{content:"";width:6px;height:11px;border:solid var(--leaf-ink);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.summary{padding:16px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 74px)}
+.summary .total{font-family:var(--display);font-size:38px;font-weight:700;line-height:1}
+.summary hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+.copybox{width:100%;min-height:120px;font-size:12px;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--surface-2);margin-top:8px}
+
+/* pantry */
+.grid-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:10px}
+.tile{padding:12px;display:grid;gap:8px;align-content:start;position:relative}
+.tile .top-row{display:flex;gap:10px;align-items:center}
+.tile .nm{font-weight:700;font-size:14px;line-height:1.2}
+.tile .te{font-size:13.5px;display:block}
+.tile.out{background:color-mix(in srgb,var(--surface-2) 60%,var(--surface))}
+.tile.out .ic{filter:grayscale(.8);opacity:.6}
+.tile .meta{display:flex;gap:4px;flex-wrap:wrap;min-height:21px}
+.tile .foot{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.tile .note{font-size:12px;color:var(--muted)}
+.cat-h{margin:22px 0 10px;display:flex;align-items:baseline;gap:10px}
+.cat-h h3{font-size:21px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:5px 9px;font-size:12px;font-weight:700;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"].full{background:var(--leaf-soft);color:var(--leaf)}
+.seg button[aria-pressed="true"].low{background:var(--turmeric-soft);color:var(--turmeric)}
+.seg button[aria-pressed="true"].out{background:var(--chilli-soft);color:var(--chilli)}
+.listbtn{border:0;background:transparent;color:var(--muted);font-size:12px;font-weight:700;padding:2px 4px;border-radius:6px}
+.listbtn[aria-pressed="true"]{color:var(--leaf)}
+
+/* dishes */
+.pickers{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin}
+.pickv{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:8px 6px 6px;display:grid;justify-items:center;gap:3px;min-width:78px;font-size:11.5px;font-weight:600;line-height:1.1;text-align:center}
+.pickv[aria-pressed="true"]{border-color:var(--leaf);background:var(--leaf-soft)}
+.dish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.dcard{padding:14px;display:grid;gap:10px;align-content:start;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);transition:border-color .15s,transform .15s}
+.dcard:hover{border-color:var(--leaf);transform:translateY(-1px)}
+.dcard h4{margin:0;font-size:17px;font-weight:700;line-height:1.2}
+.dcard .te{font-size:15px}
+.meter{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--leaf);border-radius:99px}
+.meter.mid i{background:var(--turmeric)} .meter.low i{background:var(--chilli)}
+.dcard .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+
+/* sheet */
+.sheet-wrap{position:fixed;inset:0;z-index:50;background:rgba(10,16,12,.45);display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:min(760px,100%);max-height:92%;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px));box-shadow:var(--shadow)}
+@media (min-width:761px){.sheet-wrap{align-items:center}.sheet{border-radius:20px;max-height:86%}}
+.sheet-h{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.sheet-h h2{font-size:26px}
+.close{border:0;background:var(--surface-2);width:34px;height:34px;border-radius:50%;font-size:18px;flex:none}
+.pick-list{display:grid;gap:8px;margin-top:10px}
+.pick{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px;text-align:left}
+.pick:hover{border-color:var(--leaf)}
+.pick.in{border-color:var(--leaf);background:var(--leaf-soft)}
+.pick h4{margin:0;font-size:15px}
+.pick .miss{font-size:12px;color:var(--chilli)}
+.pick .have{font-size:12px;color:var(--leaf)}
+.detail-ings{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:12px 0}
+.di{display:flex;align-items:center;gap:10px;padding:8px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.di .grow{flex:1;min-width:0;font-size:13.5px;line-height:1.25}
+.field{display:grid;gap:4px;font-size:13px;font-weight:600}
+.field input,.field select{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 10px;font-weight:400}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-weight:600;font-size:14px;z-index:60;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><h1>Vantillu</h1><span class="te">వంటిల్లు</span></div>
+    <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+    <div class="people">Cooking for
+      <div class="stepper"><button data-act="people" data-d="-1" aria-label="Fewer people">−</button><span id="peopleN" class="num">2</span><button data-act="people" data-d="1" aria-label="More people">+</button></div>
+    </div>
+    <div class="sync" id="sync" title="Where your plan is saved"><i></i><span>Saved on this device</span></div>
+  </div>
+</header>
+<main id="main"></main>
+<div class="sheet-wrap" id="sheetWrap" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ============ GROCERIES ============
+   [id, English, Telugu, category, unit, step, pack size, approx £ per pack, where to buy, shelf days, art, tip, staple] */
+const RAW_ING = [
+ ['brinjal','Brinjal','వంకాయ','veg','g',100,500,1.8,'asian',7,'brinjal','Small round purple ones; supermarket aubergine works for curries'],
+ ['okra','Okra','బెండకాయ','veg','g',100,500,2.0,'both',4,'okra','Pick firm pods that snap'],
+ ['drumstick','Drumsticks','ములక్కాడ','veg','pcs',1,4,2.5,'asian',6,'drumstick','Fresh sticks or frozen cut pieces'],
+ ['bittergourd','Bitter gourd','కాకరకాయ','veg','g',100,500,2.5,'asian',6,'bittergourd','Sold as karela'],
+ ['bottlegourd','Bottle gourd','సొరకాయ','veg','g',250,1000,2.5,'asian',8,'bottlegourd','Sold as dudhi / lauki'],
+ ['ridgegourd','Ridge gourd','బీరకాయ','veg','g',100,500,3.0,'asian',5,'ridgegourd','Sold as turai / luffa'],
+ ['snakegourd','Snake gourd','పొట్లకాయ','veg','g',100,500,2.5,'asian',5,'snakegourd','Sometimes only frozen'],
+ ['tindora','Ivy gourd','దొండకాయ','veg','g',100,500,2.5,'asian',6,'tindora','Sold as tindora / tendli; frozen packs keep well'],
+ ['rawbanana','Raw banana','అరటికాయ','veg','pcs',1,3,1.5,'asian',6,'rawbanana','Green cooking plantain'],
+ ['taro','Taro root','చామదుంప','veg','g',100,500,2.0,'asian',14,'taro','Sold as arbi / eddoes'],
+ ['yam','Elephant yam','కంద','veg','g',100,500,2.5,'asian',21,'yam','Sold as suran; frozen cubes save effort'],
+ ['clusterbeans','Cluster beans','గోరుచిక్కుడు','veg','g',100,250,2.0,'asian',5,'clusterbeans','Sold as guvar'],
+ ['broadbeans','Flat beans','చిక్కుడుకాయ','veg','g',100,250,2.0,'asian',5,'broadbeans','Sold as papdi / valor'],
+ ['dosakaya','Yellow cucumber','దోసకాయ','veg','pcs',0.5,1,2.0,'asian',14,'dosakaya','Round Andhra cucumber, often labelled dosakai'],
+ ['rawmango','Raw mango','మామిడికాయ','veg','pcs',1,1,1.2,'asian',7,'rawmango','Firm, sour green mango'],
+ ['pumpkin','Pumpkin','గుమ్మడికాయ','veg','g',100,500,1.5,'both',14,'pumpkin','Butternut squash is a good swap'],
+ ['tomato','Tomatoes','టమాటా','veg','g',100,500,1.0,'super',7,'tomato',''],
+ ['onion','Onions','ఉల్లిపాయ','veg','g',250,1000,1.0,'super',30,'onion','Red onions are closest to Indian ones'],
+ ['potato','Potatoes','బంగాళాదుంప','veg','g',250,2000,1.5,'super',30,'potato',''],
+ ['carrot','Carrots','క్యారెట్','veg','g',100,1000,0.6,'super',14,'carrot',''],
+ ['cabbage','Cabbage','క్యాబేజీ','veg','pcs',0.5,1,0.8,'super',14,'cabbage',''],
+ ['cauliflower','Cauliflower','కాలీఫ్లవర్','veg','pcs',0.5,1,1.0,'super',7,'cauliflower',''],
+ ['greenchilli','Green chillies','పచ్చిమిర్చి','veg','g',10,100,0.8,'both',10,'greenchilli','Asian-store bags are cheaper than supermarket packs'],
+ ['ginger','Ginger','అల్లం','veg','g',25,200,0.6,'super',21,'ginger',''],
+ ['garlic','Garlic','వెల్లుల్లి','veg','bulb',0.25,4,0.8,'super',30,'garlic',''],
+ ['lemon','Lemons','నిమ్మకాయ','veg','pcs',1,4,1.0,'super',14,'lemon',''],
+ ['coconut','Grated coconut','కొబ్బరి','veg','g',50,400,2.0,'asian',60,'coconut','Frozen grated packs; keep in the freezer'],
+ ['curryleaves','Curry leaves','కరివేపాకు','leafy','bunch',0.25,1,0.8,'asian',10,'curryleaves','Freeze spare sprigs in a zip bag'],
+ ['coriander','Coriander','కొత్తిమీర','leafy','bunch',0.25,1,0.7,'both',5,'coriander','Big bunches at the Asian store'],
+ ['gongura','Gongura','గోంగూర','leafy','bunch',0.5,1,2.5,'asian',4,'gongura','Sorrel leaves; frozen 300 g packs in the freezer aisle'],
+ ['spinach','Spinach','పాలకూర','leafy','g',50,250,1.2,'super',4,'spinach',''],
+ ['methi','Fenugreek leaves','మెంతికూర','leafy','bunch',0.5,1,1.0,'asian',4,'methi','Sold as methi'],
+ ['toordal','Toor dal','కందిపప్పు','pantry','g',100,1000,3.0,'asian',180,'dal:#E6B53A',''],
+ ['moongdal','Moong dal','పెసరపప్పు','pantry','g',100,1000,3.0,'asian',180,'dal:#EFD04E',''],
+ ['chanadal','Chana dal','శనగపప్పు','pantry','g',100,1000,2.5,'asian',180,'dal:#DDAA3E',''],
+ ['uraddal','Urad dal','మినప్పప్పు','pantry','g',100,1000,3.5,'asian',180,'dal:#F3EEE0',''],
+ ['wholemoong','Whole green moong','పెసలు','pantry','g',100,1000,3.0,'asian',180,'dal:#6E8F3A','For pesarattu; soak overnight'],
+ ['rice','Sona masoori rice','బియ్యం','pantry','g',500,5000,9.0,'asian',365,'rice','5 kg bag lasts two people about 2–3 weeks'],
+ ['atta','Chapati atta','గోధుమ పిండి','pantry','g',500,5000,6.0,'both',120,'atta',''],
+ ['upmarava','Upma rava','ఉప్మా రవ్వ','pantry','g',100,1000,1.8,'asian',120,'dal:#EEDDB0','Fine semolina (sooji)'],
+ ['idlirava','Idli rava','ఇడ్లీ రవ్వ','pantry','g',100,1000,2.0,'asian',120,'dal:#F3E9CF',''],
+ ['tamarind','Tamarind','చింతపండు','pantry','g',50,400,1.5,'asian',365,'tamarind','Seedless block'],
+ ['jaggery','Jaggery','బెల్లం','pantry','g',50,500,2.0,'asian',365,'jaggery',''],
+ ['peanuts','Peanuts','పల్లీలు','pantry','g',50,500,2.0,'both',120,'peanuts','Raw, skin-on'],
+ ['sesame','Sesame seeds','నువ్వులు','pantry','g',25,200,1.2,'both',180,'seeds:#EFE4C8',''],
+ ['curd','Curd','పెరుగు','dairy','g',100,1000,1.6,'super',10,'curd','Full-fat natural yoghurt'],
+ ['ghee','Ghee','నెయ్యి','dairy','g',50,500,5.0,'both',180,'ghee',''],
+ ['eggs','Eggs','గుడ్లు','dairy','pcs',1,12,2.8,'super',21,'eggs',''],
+ ['mustard','Mustard seeds','ఆవాలు','spice','jar',1,1,0.8,'asian',365,'seeds:#3B2B24','',1],
+ ['cumin','Cumin seeds','జీలకర్ర','spice','jar',1,1,1.0,'asian',365,'seeds:#8C6B40','',1],
+ ['turmeric','Turmeric','పసుపు','spice','jar',1,1,1.0,'asian',365,'powder:#E6AE17','',1],
+ ['chillipowder','Red chilli powder','కారం','spice','jar',1,1,1.5,'asian',365,'powder:#C2301E','Guntur chilli powder if you can find it',1],
+ ['drychilli','Dry red chillies','ఎండుమిర్చి','spice','jar',1,1,1.2,'asian',365,'drychilli','',1],
+ ['hing','Asafoetida','ఇంగువ','spice','jar',1,1,1.5,'asian',365,'powder:#D9C79A','',1],
+ ['oil','Groundnut oil','వేరుశనగ నూనె','spice','jar',1,1,3.5,'both',365,'oil','1 litre bottle',1],
+];
+const ING={}; RAW_ING.forEach(([id,en,te,cat,unit,step,pack,price,store,shelf,art,note,staple])=>ING[id]={id,en,te,cat,unit,step,pack,price,store,shelf,art,note:note||'',staple:!!staple});
+const CATS={veg:'Vegetables',leafy:'Leaves & herbs',pantry:'Dals, grains & pantry',dairy:'Dairy & eggs',spice:'Tadka box & staples'};
+const STORES={asian:'Asian grocer',super:'Supermarket',both:'Either shop'};
+
+/* ============ DISHES (quantities for 2 people) ============ */
+const DISH_CATS={tiffin:'Tiffin',pappu:'Pappu · Dal',kura:'Kura · Dry curry',pulusu:'Pulusu & Charu',rice:'Rice & rotis',pachadi:'Pachadi · Chutney'};
+const DISHES=[
+ {id:'pesarattu',en:'Pesarattu',te:'పెసరట్టు',cat:'tiffin',slots:'bd',mins:25,ing:[['wholemoong',150],['onion',100],['greenchilli',10],['ginger',25],['rice',30]],steps:'Soak moong and a spoon of rice overnight. Grind with ginger and chillies to a thick batter. Spread thin on a hot tawa, scatter chopped onion, cook both sides. Serve with allam pachadi.'},
+ {id:'upma',en:'Upma',te:'ఉప్మా',cat:'tiffin',slots:'b',mins:20,ing:[['upmarava',150],['onion',100],['carrot',50],['greenchilli',10],['ginger',10],['curryleaves',0.25]],steps:'Dry-roast rava. Temper mustard, chana dal, curry leaves, chillies and ginger; add onion and carrot. Pour in 2½ cups boiling water with salt, stir in rava and cover for 3 minutes.'},
+ {id:'idli',en:'Idli & Palli Chutney',te:'ఇడ్లీ',cat:'tiffin',slots:'b',mins:20,ing:[['idlirava',200],['uraddal',100],['peanuts',60],['greenchilli',10]],steps:'Grind soaked urad dal fluffy, mix with rinsed idli rava and ferment overnight. Steam 12 minutes. For chutney, grind roasted peanuts with chillies, salt and a little tamarind.'},
+ {id:'dosa',en:'Dosa & Kobbari Chutney',te:'దోశ',cat:'tiffin',slots:'bd',mins:25,ing:[['rice',200],['uraddal',70],['coconut',80],['greenchilli',10]],steps:'Soak rice and urad dal 5 hours, grind and ferment overnight. Spread thin on a hot tawa with a little oil. Grind coconut, chillies and salt for the chutney and temper with mustard.'},
+ {id:'uttapam',en:'Onion Uttapam',te:'ఊతప్పం',cat:'tiffin',slots:'bd',mins:25,ing:[['rice',200],['uraddal',70],['onion',150],['tomato',100],['greenchilli',10],['coriander',0.25]],steps:'Use dosa batter. Pour thick rounds, top with onion, tomato, chilli and coriander, press in and cook covered until golden underneath.'},
+ {id:'punugulu',en:'Punugulu',te:'పునుగులు',cat:'tiffin',slots:'b',mins:25,ing:[['rice',150],['uraddal',50],['onion',100],['greenchilli',10],['curryleaves',0.25]],steps:'Mix sour dosa batter with chopped onion, chilli, curry leaves and a pinch of soda. Drop small spoonfuls into hot oil and fry crisp. Great with palli chutney.'},
+
+ {id:'tomatopappu',en:'Tomato Pappu',te:'టమాటా పప్పు',cat:'pappu',slots:'ld',mins:30,ing:[['toordal',150],['tomato',300],['greenchilli',15],['onion',50],['garlic',0.25],['curryleaves',0.25]],steps:'Pressure-cook toor dal with tomatoes, chillies, onion and turmeric for 3 whistles. Mash well, salt, then temper with mustard, cumin, garlic, dry chillies and curry leaves.'},
+ {id:'sorakayapappu',en:'Sorakaya Pappu',te:'సొరకాయ పప్పు',cat:'pappu',slots:'ld',mins:30,ing:[['toordal',150],['bottlegourd',300],['tomato',100],['greenchilli',10],['curryleaves',0.25]],steps:'Cook toor dal with cubed bottle gourd, tomato and chillies. Add a small piece of tamarind water, simmer, then temper with mustard, cumin, garlic and curry leaves.'},
+ {id:'palakurapappu',en:'Palakura Pappu',te:'పాలకూర పప్పు',cat:'pappu',slots:'ld',mins:30,ing:[['toordal',150],['spinach',250],['tomato',100],['greenchilli',10],['garlic',0.25]],steps:'Pressure-cook dal with chopped spinach, tomato and chillies. Mash, add salt and a squeeze of tamarind or lemon, and finish with a garlic tadka.'},
+ {id:'gongurapappu',en:'Gongura Pappu',te:'గోంగూర పప్పు',cat:'pappu',slots:'ld',mins:30,ing:[['toordal',150],['gongura',1],['greenchilli',15],['onion',100],['garlic',0.25]],steps:'Cook toor dal with gongura leaves, onion and chillies until the leaves melt. Mash together; no tamarind needed. Temper with plenty of garlic and dry chillies.'},
+ {id:'mamidikayapappu',en:'Mamidikaya Pappu',te:'మామిడికాయ పప్పు',cat:'pappu',slots:'ld',mins:30,ing:[['toordal',150],['rawmango',1],['greenchilli',10],['curryleaves',0.25]],steps:'Cook toor dal with peeled raw mango pieces and chillies. Mash, adjust salt and sourness, then temper with mustard, dry chilli, hing and curry leaves.'},
+ {id:'dosakayapappu',en:'Dosakaya Pappu',te:'దోసకాయ పప్పు',cat:'pappu',slots:'ld',mins:30,ing:[['toordal',150],['dosakaya',0.5],['tomato',100],['greenchilli',10]],steps:'Taste the cucumber first to check it is not bitter. Cook with dal, tomato and chillies, mash lightly and finish with a mustard–garlic tadka.'},
+ {id:'menthipappu',en:'Menthikura Pappu',te:'మెంతికూర పప్పు',cat:'pappu',slots:'ld',mins:30,ing:[['toordal',150],['methi',1],['tomato',100],['garlic',0.25],['greenchilli',10]],steps:'Sauté methi leaves briefly with garlic, add to cooked dal with tomato and chillies. Simmer 5 minutes and temper.'},
+ {id:'moongpappu',en:'Pesara Pappu',te:'పెసర పప్పు',cat:'pappu',slots:'ld',mins:20,ing:[['moongdal',150],['tomato',100],['greenchilli',10],['ginger',10],['coriander',0.25]],steps:'Cook moong dal soft with tomato, chilli and ginger. Whisk smooth, temper with cumin and ghee, top with coriander. Light and quick for weeknights.'},
+
+ {id:'guttivankaya',en:'Gutti Vankaya Kura',te:'గుత్తి వంకాయ కూర',cat:'kura',slots:'ld',mins:40,ing:[['brinjal',400],['peanuts',50],['sesame',20],['onion',150],['tamarind',10],['coconut',30]],steps:'Roast and grind peanuts, sesame, coconut, onion and spices to a paste. Slit brinjals in a cross, stuff with paste and cook covered in oil. Add leftover paste with tamarind water and simmer until thick.'},
+ {id:'bendakaya',en:'Bendakaya Vepudu',te:'బెండకాయ వేపుడు',cat:'kura',slots:'ld',mins:25,ing:[['okra',400],['onion',100],['greenchilli',10],['peanuts',30],['curryleaves',0.25]],steps:'Dry okra fully, slice into rounds. Fry in an open pan without a lid until crisp, then add onion, chilli, curry leaves and crushed roasted peanuts with chilli powder and salt.'},
+ {id:'beerakaya',en:'Beerakaya Kura',te:'బీరకాయ కూర',cat:'kura',slots:'ld',mins:25,ing:[['ridgegourd',400],['onion',100],['tomato',100],['greenchilli',10],['chanadal',20]],steps:'Peel ridge gourd ridges and cube. Temper chana dal and mustard, add onion and chillies, then gourd and tomato. Cook covered in its own water until soft.'},
+ {id:'potlakaya',en:'Potlakaya Kura',te:'పొట్లకాయ కూర',cat:'kura',slots:'ld',mins:25,ing:[['snakegourd',400],['chanadal',40],['onion',100],['greenchilli',10],['coconut',30]],steps:'Soak chana dal 30 minutes. Temper, add onion, chilli and chopped snake gourd with the dal. Cook covered, then toss with grated coconut.'},
+ {id:'dondakaya',en:'Dondakaya Vepudu',te:'దొండకాయ వేపుడు',cat:'kura',slots:'ld',mins:30,ing:[['tindora',400],['peanuts',30],['onion',50],['garlic',0.25],['curryleaves',0.25]],steps:'Slice ivy gourd into thin rounds. Fry slowly in oil until browned, then add a coarse garlic–peanut–chilli powder and curry leaves.'},
+ {id:'aratikaya',en:'Aratikaya Vepudu',te:'అరటికాయ వేపుడు',cat:'kura',slots:'ld',mins:25,ing:[['rawbanana',2],['greenchilli',10],['garlic',0.25],['curryleaves',0.25]],steps:'Peel and cube raw banana, parboil in turmeric water 4 minutes. Drain and shallow-fry with garlic, curry leaves, chilli powder and salt until crisp-edged.'},
+ {id:'kanda',en:'Kanda Vepudu',te:'కంద వేపుడు',cat:'kura',slots:'ld',mins:35,ing:[['yam',400],['tamarind',10],['curryleaves',0.25],['garlic',0.25]],steps:'Boil yam cubes with tamarind and turmeric (stops the itch). Drain, then fry in oil with garlic, curry leaves and chilli powder until crisp.'},
+ {id:'goruchikkudu',en:'Goruchikkudu Kura',te:'గోరుచిక్కుడు కూర',cat:'kura',slots:'ld',mins:25,ing:[['clusterbeans',300],['peanuts',40],['onion',100],['greenchilli',10]],steps:'Boil chopped cluster beans with salt, drain. Temper with mustard and onion, add beans and a crushed roasted peanut–chilli powder.'},
+ {id:'chikkudu',en:'Chikkudukaya Tomato Kura',te:'చిక్కుడుకాయ టమాటా కూర',cat:'kura',slots:'ld',mins:25,ing:[['broadbeans',300],['tomato',200],['onion',100],['greenchilli',10]],steps:'String and chop the flat beans. Cook onion and tomato to a masala, add beans with chilli powder and salt, cover and cook until tender.'},
+ {id:'aloofry',en:'Bangaladumpa Vepudu',te:'బంగాళాదుంప వేపుడు',cat:'kura',slots:'ld',mins:25,ing:[['potato',400],['onion',100],['curryleaves',0.25],['garlic',0.25]],steps:'Cube potatoes, parboil 3 minutes. Fry in oil with mustard, curry leaves, garlic and onion; add chilli powder and salt and roast until crisp.'},
+ {id:'cabbage',en:'Cabbage Kura',te:'క్యాబేజీ కూర',cat:'kura',slots:'ld',mins:20,ing:[['cabbage',0.5],['chanadal',30],['coconut',30],['greenchilli',10],['curryleaves',0.25]],steps:'Temper mustard, chana dal, chillies and curry leaves. Add finely shredded cabbage, salt and a splash of water; cook 8 minutes and finish with coconut.'},
+ {id:'cauliflower',en:'Cauliflower Kura',te:'కాలీఫ్లవర్ కూర',cat:'kura',slots:'ld',mins:30,ing:[['cauliflower',0.5],['potato',150],['tomato',150],['onion',100],['ginger',10]],steps:'Blanch florets in hot salted water. Cook onion, ginger and tomato to a masala, add potato and florets with spices, cover until tender.'},
+ {id:'carrotkura',en:'Carrot Kobbari Kura',te:'క్యారెట్ కొబ్బరి కూర',cat:'kura',slots:'ld',mins:20,ing:[['carrot',300],['coconut',40],['chanadal',20],['greenchilli',10]],steps:'Grate or finely chop carrots. Temper chana dal and mustard, add carrots and chilli, cook 6 minutes and mix in grated coconut.'},
+ {id:'kakarakayafry',en:'Kakarakaya Vepudu',te:'కాకరకాయ వేపుడు',cat:'kura',slots:'ld',mins:30,ing:[['bittergourd',300],['onion',100],['jaggery',15],['peanuts',30]],steps:'Slice bitter gourd thin, rub with salt and squeeze after 20 minutes. Fry until crisp with onion, then add jaggery and a peanut–chilli powder.'},
+
+ {id:'mulakkada',en:'Mulakkada Pulusu',te:'ములక్కాడ పులుసు',cat:'pulusu',slots:'ld',mins:35,ing:[['drumstick',3],['tomato',200],['onion',150],['tamarind',20],['jaggery',10],['curryleaves',0.25]],steps:'Cook drumstick pieces with onion and tomato. Add tamarind water, chilli powder, turmeric and a little jaggery; simmer until thick. Thicken with a spoon of rice flour if you like.'},
+ {id:'kakarakayapulusu',en:'Kakarakaya Pulusu',te:'కాకరకాయ పులుసు',cat:'pulusu',slots:'ld',mins:35,ing:[['bittergourd',300],['tamarind',30],['jaggery',30],['onion',150],['sesame',10]],steps:'Fry salted, squeezed bitter gourd with onion. Add tamarind water, jaggery and chilli powder and simmer 15 minutes. Stir in roasted sesame powder at the end.'},
+ {id:'chamadumpa',en:'Chamadumpa Pulusu',te:'చామదుంప పులుసు',cat:'pulusu',slots:'ld',mins:35,ing:[['taro',400],['tamarind',25],['onion',100],['jaggery',10],['greenchilli',10]],steps:'Boil taro, peel and halve. Cook onion and chillies, add tamarind water, jaggery and spices, then taro; simmer until the gravy coats the pieces.'},
+ {id:'gummadikaya',en:'Gummadikaya Pulusu',te:'గుమ్మడికాయ పులుసు',cat:'pulusu',slots:'ld',mins:30,ing:[['pumpkin',400],['tamarind',25],['jaggery',20],['onion',100],['greenchilli',10]],steps:'Cook pumpkin cubes with onion and chillies. Add tamarind water, jaggery, chilli powder and salt; simmer until pumpkin is soft but holds shape.'},
+ {id:'majjiga',en:'Majjiga Pulusu',te:'మజ్జిగ పులుసు',cat:'pulusu',slots:'ld',mins:25,ing:[['curd',400],['bottlegourd',200],['coconut',20],['ginger',10],['greenchilli',10]],steps:'Boil bottle gourd pieces. Grind coconut, ginger, chillies and a spoon of soaked chana dal; whisk into curd with water. Warm gently with the gourd without boiling, then temper.'},
+ {id:'tomatocharu',en:'Tomato Charu',te:'టమాటా చారు',cat:'pulusu',slots:'ld',mins:20,ing:[['tomato',300],['tamarind',15],['garlic',0.25],['coriander',0.25],['curryleaves',0.25]],steps:'Boil mashed tomatoes in tamarind water with crushed garlic, pepper, cumin and turmeric. Temper with mustard, dry chilli and curry leaves; finish with coriander.'},
+ {id:'pappucharu',en:'Pappu Charu',te:'పప్పు చారు',cat:'pulusu',slots:'ld',mins:30,ing:[['toordal',100],['tamarind',20],['onion',100],['tomato',100],['drumstick',1],['greenchilli',10]],steps:'Cook dal soft. Simmer onion, tomato and drumstick in tamarind water with chillies, add the mashed dal and water to a thin consistency, then temper.'},
+ {id:'kodiguddu',en:'Kodiguddu Pulusu',te:'కోడిగుడ్డు పులుసు',cat:'pulusu',slots:'ld',mins:35,ing:[['eggs',4],['onion',200],['tomato',150],['tamarind',15],['ginger',10],['garlic',0.25]],steps:'Boil and peel eggs, slit lightly. Cook onion, ginger–garlic and tomato, add chilli powder, coriander powder and tamarind water. Simmer the eggs in the gravy 10 minutes.'},
+
+ {id:'annam',en:'Annam (steamed rice)',te:'అన్నం',cat:'rice',slots:'ld',mins:20,ing:[['rice',200]],steps:'Rinse rice twice, cook with 2½ times water in a pressure cooker for 3 whistles or a pan until soft.'},
+ {id:'chapati',en:'Chapati',te:'చపాతీ',cat:'rice',slots:'ld',mins:30,ing:[['atta',200],['ghee',10]],steps:'Knead atta with water and a pinch of salt, rest 20 minutes. Roll thin and cook on a hot tawa, brushing with ghee.'},
+ {id:'nimmakaya',en:'Nimmakaya Pulihora',te:'నిమ్మకాయ పులిహోర',cat:'rice',slots:'ld',mins:25,ing:[['rice',200],['lemon',2],['peanuts',40],['chanadal',20],['greenchilli',15],['curryleaves',0.25]],steps:'Cook rice and spread to cool. Temper peanuts, chana dal, mustard, chillies, curry leaves and turmeric. Mix into rice with lemon juice and salt.'},
+ {id:'chintapandu',en:'Chintapandu Pulihora',te:'చింతపండు పులిహోర',cat:'rice',slots:'ld',mins:35,ing:[['rice',200],['tamarind',40],['peanuts',40],['jaggery',10],['sesame',10],['curryleaves',0.25]],steps:'Cook tamarind pulp with salt, turmeric and a little jaggery to a thick paste. Temper peanuts and curry leaves, fold into cooled rice with the paste and sesame powder.'},
+ {id:'daddojanam',en:'Daddojanam',te:'దద్దోజనం',cat:'rice',slots:'ld',mins:15,ing:[['rice',150],['curd',300],['ginger',10],['greenchilli',10],['curryleaves',0.25]],steps:'Mash soft cooked rice with curd and salt. Temper mustard, urad dal, ginger, chillies and curry leaves and stir in. Serve cool.'},
+
+ {id:'tomatopachadi',en:'Tomato Pachadi',te:'టమాటా పచ్చడి',cat:'pachadi',slots:'bld',mins:20,ing:[['tomato',300],['tamarind',5],['garlic',0.25]],steps:'Fry tomatoes soft with dry chillies. Grind with tamarind, garlic and salt, then temper with mustard and hing.'},
+ {id:'dosakayapachadi',en:'Dosakaya Pachadi',te:'దోసకాయ పచ్చడి',cat:'pachadi',slots:'ld',mins:15,ing:[['dosakaya',0.5],['greenchilli',15]],steps:'Chop yellow cucumber with skin. Grind roasted chillies, mustard and salt, then pulse in the cucumber coarsely. Temper and rest 30 minutes.'},
+ {id:'allam',en:'Allam Pachadi',te:'అల్లం పచ్చడి',cat:'pachadi',slots:'b',mins:15,ing:[['ginger',60],['tamarind',20],['jaggery',30],['chanadal',10]],steps:'Fry ginger with chana dal and dry chillies. Grind with tamarind, jaggery and salt to a smooth sweet-sour chutney. The classic partner for pesarattu.'},
+ {id:'pallichutney',en:'Palli Chutney',te:'పల్లీ చట్నీ',cat:'pachadi',slots:'b',mins:10,ing:[['peanuts',100],['greenchilli',15],['tamarind',5]],steps:'Roast peanuts and peel. Grind with chillies, tamarind, salt and water; temper with mustard and curry leaves.'},
+];
+
+/* ============ ILLUSTRATIONS ============ */
+const pod=(tx,rot,c)=>`<g transform="translate(${tx} 0) rotate(${rot} 32 32)"><path d="M32 9c4 0 6 6 6 14l-3 31c-1 4-5 4-6 0l-3-31c0-8 2-14 6-14z" fill="${c}"/><path d="M32 13v43M29.4 17l1 35M34.6 17l-1 35" stroke="#1d3a0f" stroke-opacity=".22" stroke-width="1" fill="none"/><rect x="30" y="3" width="4" height="9" rx="2" fill="#45722A"/></g>`;
+const bowl=(heap,grains)=>`<ellipse cx="32" cy="56" rx="22" ry="3.5" fill="#000" opacity=".08"/><path d="M11 34Q32 10 53 34Z" fill="${heap}"/>${(grains||[[22,30],[28,25],[34,23],[40,27],[45,31],[30,31],[37,31],[18,33],[25,33.5],[42,33.5]]).map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="2.3" ry="1.6" fill="#000" opacity=".12"/>`).join('')}<path d="M8 35h48q-2 19-24 19T8 35z" fill="#AEB6BE"/><path d="M8 35h48" stroke="#D9DEE3" stroke-width="3.5" stroke-linecap="round"/><path d="M15 40q4 9 14 10" stroke="#fff" stroke-opacity=".45" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+const smallbowl=(heap,dots)=>`<ellipse cx="32" cy="55" rx="20" ry="3" fill="#000" opacity=".08"/><path d="M14 36Q32 16 50 36Z" fill="${heap}"/>${dots?Array.from({length:22},(_,i)=>`<circle cx="${18+(i*7.3)%28}" cy="${26+((i*5.1)%9)}" r="1.3" fill="#000" opacity=".22"/>`).join(''):''}<path d="M11 36h42q-3 17-21 17T11 36z" fill="#9C5A3C"/><path d="M11 36h42" stroke="#B9724F" stroke-width="3" stroke-linecap="round"/>`;
+const leafPath=(x,y,rot,s,c)=>`<path transform="translate(${x} ${y}) rotate(${rot}) scale(${s})" d="M0 0C-5-4-5-12 0-17 5-12 5-4 0 0Z" fill="${c}"/>`;
+const ART={
+ brinjal:()=>`<ellipse cx="33" cy="40" rx="17" ry="18" fill="#5A2770"/><ellipse cx="27" cy="35" rx="5" ry="8.5" fill="#A266BD" opacity=".55"/><path d="M17 26c7-8 25-8 31 0-3 3-7 3-9 1-3 3-10 3-13 0-3 2-6 2-9-1z" fill="#4F8B34"/><rect x="30.5" y="8" width="5" height="14" rx="2.5" fill="#3E6E27"/>`,
+ okra:()=>pod(-8,-14,'#6BAA45')+pod(8,14,'#5B9A38'),
+ drumstick:()=>`<g transform="rotate(-38 32 32)"><rect x="23" y="-2" width="7" height="68" rx="3.5" fill="#5A8A36"/><rect x="34" y="2" width="7" height="62" rx="3.5" fill="#6FA046"/>${[8,20,32,44,56].map(y=>`<path d="M23 ${y}h7M34 ${y+5}h7" stroke="#34561d" stroke-width="1.6"/>`).join('')}</g>`,
+ bittergourd:()=>`<g transform="rotate(-28 32 32)"><path d="M32 3c12 10 13 45 0 58C19 48 20 13 32 3z" fill="#4E9933"/>${[[32,10],[29,16],[35,16],[27,23],[32,22],[37,23],[26,30],[31,29],[36,30],[39,34],[25,37],[30,36],[35,37],[27,44],[32,43],[37,44],[29,51],[34,51]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.9" fill="#86CC62"/>`).join('')}<rect x="30.5" y="0" width="3" height="6" rx="1.5" fill="#3E6E27"/></g>`,
+ bottlegourd:()=>`<g transform="rotate(-18 32 32)"><path d="M29 5h6v7c0 6 8 8 8 15 0 4-2 6-2 8 7 4 9 10 9 16 0 9-8 11-18 11s-18-2-18-11c0-6 2-12 9-16 0-2-2-4-2-8 0-7 8-9 8-15z" fill="#BCD98A"/><path d="M22 42c-2 6-1 12 3 15" stroke="#fff" stroke-opacity=".6" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="29" y="2" width="6" height="6" rx="2" fill="#5F8A3A"/></g>`,
+ ridgegourd:()=>`<g transform="rotate(-32 32 32)"><path d="M32 2c9 9 10 50 0 60-10-10-9-51 0-60z" fill="#5B8F3C"/><path d="M32 5v55M27.8 11c-1 14-1 33 1.5 45M36.2 11c1 14 1 33-1.5 45" stroke="#2C571C" stroke-width="1.5" fill="none"/></g>`,
+ snakegourd:()=>`<path d="M9 55C17 40 28 58 36 40S50 18 56 8" stroke="#A7D07A" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M9 55C17 40 28 58 36 40S50 18 56 8" stroke="#F4FAEA" stroke-width="2.2" fill="none" stroke-dasharray="6 5" stroke-linecap="round"/>`,
+ tindora:()=>[[21,38,-25],[33,29,8],[44,40,32]].map(([x,y,r])=>`<g transform="rotate(${r} ${x} ${y})"><ellipse cx="${x}" cy="${y}" rx="7.5" ry="13" fill="#3D8834"/><path d="M${x} ${y-11}v22M${x-3.6} ${y-9}v18M${x+3.6} ${y-9}v18" stroke="#D3EDBD" stroke-width="1.3" stroke-dasharray="3 2"/></g>`).join(''),
+ rawbanana:()=>`<path d="M9 36c5 17 33 21 47-5l3-9-4-2-3 7C44 42 23 45 13 31z" fill="#5F8E2E"/><path d="M11 26c6 16 31 19 43-3l2-8-4-1-2 6c-9 16-27 14-35 3z" fill="#7BAA42"/><rect x="52" y="12" width="4" height="7" rx="1.5" fill="#3F5F1F" transform="rotate(20 54 15)"/>`,
+ taro:()=>[[22,38,12,14],[42,34,11,15],[33,48,9,8]].map(([x,y,rx,ry])=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#8A6A4A"/><path d="M${x-rx+2} ${y-4}q${rx-2} 4 ${2*rx-4} 0M${x-rx+2} ${y+4}q${rx-2} 4 ${2*rx-4} 0" stroke="#5B4430" stroke-width="1.4" fill="none"/>`).join(''),
+ yam:()=>`<path d="M9 36c0-14 14-23 27-21s18 12 16 23-13 17-25 15S9 46 9 36z" fill="#7A5A3D"/><ellipse cx="40" cy="37" rx="11" ry="13" fill="#EADBB9"/>${[[37,31],[43,35],[39,41],[44,43],[36,37]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.2" fill="#C9A77A"/>`).join('')}`,
+ clusterbeans:()=>[-24,-12,0,12,24].map((r,i)=>`<g transform="rotate(${r} 32 58)"><path d="M32 58V12" stroke="${i%2?'#5E9E3C':'#4C8A30'}" stroke-width="5" stroke-linecap="round"/>${[20,30,40].map(y=>`<circle cx="32" cy="${y}" r="1.3" fill="#2E5A1B"/>`).join('')}</g>`).join(''),
+ broadbeans:()=>[[-30,'#8BBF58'],[0,'#79B04A'],[30,'#6AA33E']].map(([r,c])=>`<g transform="rotate(${r} 32 36)"><path d="M28 8c7 2 9 10 9 26s-2 24-9 26c3-8 3-44 0-52z" fill="${c}"/><path d="M28 8c-3 2-3 50 0 52" stroke="${c}" stroke-width="6" stroke-linecap="round"/>${[18,30,42].map(y=>`<ellipse cx="31" cy="${y}" rx="3" ry="4" fill="#fff" opacity=".25"/>`).join('')}</g>`).join(''),
+ tomato:()=>`<circle cx="32" cy="37" r="21" fill="#D63A2A"/><ellipse cx="24" cy="30" rx="5.5" ry="3.5" fill="#F58A74" opacity=".7"/><path d="M32 17l3 5 6-2-3 5 5 3-6 1-2 5-3-5-3 5-2-5-6-1 5-3-3-5 6 2z" fill="#3E8A2E"/>`,
+ onion:()=>`<path d="M32 10c2 8 20 14 20 30 0 12-10 18-20 18S12 52 12 40c0-16 18-22 20-30z" fill="#A33D63"/><path d="M32 13c-3 10-9 20-9 30M32 13c3 10 9 20 9 30M32 13v42" stroke="#E08DAE" stroke-width="1.4" fill="none" opacity=".8"/><path d="M28 58h8" stroke="#6B2340" stroke-width="3" stroke-linecap="round"/><path d="M32 10c-1-3 0-6 2-8" stroke="#6E9B3E" stroke-width="2.2" fill="none" stroke-linecap="round"/>`,
+ potato:()=>`<path d="M10 36c0-12 11-19 23-19s21 7 21 17-9 19-23 19S10 46 10 36z" fill="#C79D5F"/><path d="M16 30c3-5 9-8 15-8" stroke="#E6C58E" stroke-width="3" fill="none" stroke-linecap="round"/>${[[24,38],[38,32],[43,43],[30,46]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="1.8" ry="1.2" fill="#8C6A3A"/>`).join('')}`,
+ greenchilli:()=>`<path d="M12 12c1 20 12 36 36 44-20-1-33-17-36-44z" fill="#3E9A35"/><path d="M22 8c3 19 14 32 34 37-19 2-33-11-34-37z" fill="#57B347"/><path d="M12 12c-1-3 0-5 2-6M22 8c-1-3 0-5 2-6" stroke="#2D6A22" stroke-width="2.5" stroke-linecap="round"/>`,
+ curryleaves:()=>`<path d="M32 60V6" stroke="#5A7A2E" stroke-width="1.8"/>${[0,1,2,3,4,5].map(i=>{const y=54-i*8,s=1-i*.08;return leafPath(32,y,-58,s*.9,'#2F6B2A')+leafPath(32,y-3,58,s*.9,'#3D8435')}).join('')}${leafPath(32,10,0,.7,'#3D8435')}`,
+ coriander:()=>`<path d="M32 60L20 26M32 60L32 18M32 60L44 26" stroke="#6BA046" stroke-width="1.8" fill="none"/>${[[20,22],[32,14],[44,22],[26,32],[38,32]].map(([x,y])=>`<g fill="#4E9A3A"><circle cx="${x}" cy="${y}" r="5.5"/><circle cx="${x-5}" cy="${y+3}" r="3.8"/><circle cx="${x+5}" cy="${y+3}" r="3.8"/><circle cx="${x}" cy="${y-5}" r="3.5"/></g>`).join('')}`,
+ gongura:()=>`<path d="M22 60L26 30M42 60L38 28M32 60V20" stroke="#9A2B3A" stroke-width="2.2" fill="none"/>${[[26,30],[38,28],[32,20]].map(([x,y])=>leafPath(x,y,-40,1,'#4A8B34')+leafPath(x,y,0,1.1,'#3F7E2D')+leafPath(x,y,40,1,'#4A8B34')).join('')}`,
+ spinach:()=>[-38,-12,14,38].map((r,i)=>`<g transform="rotate(${r} 32 60)"><path d="M32 60c-11-11-13-30 0-46 13 16 11 35 0 46z" fill="${i%2?'#2F7D34':'#3A8E3D'}"/><path d="M32 58V20" stroke="#A9D39A" stroke-width="1.3"/></g>`).join(''),
+ methi:()=>`<path d="M32 60L22 22M32 60V14M32 60L42 22" stroke="#7AA852" stroke-width="1.6" fill="none"/>${[[22,22],[32,14],[42,22],[26,38],[38,38],[28,50],[36,50]].map(([x,y])=>`<g fill="#5AA33E"><ellipse cx="${x-4}" cy="${y}" rx="3.6" ry="2.6"/><ellipse cx="${x+4}" cy="${y}" rx="3.6" ry="2.6"/><ellipse cx="${x}" cy="${y-4}" rx="2.6" ry="3.6"/></g>`).join('')}`,
+ carrot:()=>`<g transform="rotate(20 32 32)"><path d="M22 18h20c-2 16-6 32-10 42-4-10-8-26-10-42z" fill="#EE7F22"/><path d="M25 26h6M27 36h5M29 46h4" stroke="#C45E12" stroke-width="1.6" stroke-linecap="round"/><path d="M32 18c-4-6-10-10-14-10M32 18c0-7 1-12 3-15M32 18c4-5 10-8 14-8" stroke="#4F9A3A" stroke-width="3" fill="none" stroke-linecap="round"/></g>`,
+ cabbage:()=>`<circle cx="32" cy="36" r="22" fill="#A7CD7A"/><path d="M14 30c8-10 28-10 36 0M16 44c6 8 26 8 32 0M32 14c-6 10-6 34 0 44" stroke="#7DAA52" stroke-width="2" fill="none"/><circle cx="32" cy="36" r="8" fill="#C7E2A3"/>`,
+ cauliflower:()=>`<path d="M8 42c6 14 18 18 24 18s18-4 24-18c-8 4-16 4-24 4s-16 0-24-4z" fill="#4E8A34"/>${[[20,34],[32,30],[44,34],[26,24],[38,24],[32,38],[22,42],[42,42]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="7.5" fill="#F4ECD4" stroke="#DCCDA5" stroke-width="1"/>`).join('')}`,
+ rawmango:()=>`<path d="M16 22c10-13 34-9 36 12s-13 27-25 25S5 36 16 22z" fill="#6EAD39"/><ellipse cx="24" cy="30" rx="5" ry="8" fill="#A8D877" opacity=".55" transform="rotate(-30 24 30)"/><path d="M40 14c2-4 5-6 8-6" stroke="#5B3A1E" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M44 10c4-2 9 0 10 4-4 1-8 0-10-4z" fill="#3F7E2D"/>`,
+ dosakaya:()=>`<ellipse cx="32" cy="36" rx="23" ry="20" fill="#E9C84A"/><path d="M12 30c6-6 14-8 20-8M14 42c8-2 16-2 22 2M32 18c4 8 12 12 22 12M36 54c4-6 10-10 18-12" stroke="#8FAA36" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="22" cy="28" rx="5" ry="3" fill="#FFF3B5" opacity=".6"/>`,
+ pumpkin:()=>`<ellipse cx="20" cy="38" rx="12" ry="17" fill="#E07F22"/><ellipse cx="44" cy="38" rx="12" ry="17" fill="#E07F22"/><ellipse cx="32" cy="38" rx="12" ry="18" fill="#F29A3A"/><path d="M32 20c0-5 2-9 5-11" stroke="#5B7A2E" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
+ ginger:()=>`<g fill="#D3A96B" stroke="#A57B42" stroke-width="1.3"><rect x="10" y="30" width="30" height="13" rx="6.5"/><rect x="30" y="20" width="12" height="22" rx="6" transform="rotate(20 36 31)"/><rect x="18" y="36" width="12" height="20" rx="6" transform="rotate(-25 24 46)"/><rect x="38" y="36" width="18" height="11" rx="5.5"/></g><path d="M16 36h6M44 41h6" stroke="#A57B42" stroke-width="1.2"/>`,
+ garlic:()=>`<path d="M32 12c4 8 19 14 19 29 0 10-8 16-19 16S13 51 13 41c0-15 15-21 19-29z" fill="#F5F0E6" stroke="#D2C6B0" stroke-width="1.4"/><path d="M32 16c-4 8-9 16-9 26M32 16c4 8 9 16 9 26M32 16v40" stroke="#D2C6B0" stroke-width="1.3" fill="none"/><path d="M26 57h12" stroke="#B9A98C" stroke-width="2" stroke-linecap="round"/><path d="M31 12c-1-3 0-6 2-8" stroke="#9FB27A" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+ lemon:()=>`<path d="M14 27c5-11 28-11 33 0-5 11-28 11-33 0z" fill="#E9C22C" transform="rotate(-15 30 27)"/><path d="M10 40c6-14 38-14 44 0-6 14-38 14-44 0z" fill="#F4D63D"/><ellipse cx="24" cy="36" rx="6" ry="2.5" fill="#FFF6BE" opacity=".7"/><circle cx="54" cy="40" r="1.8" fill="#C9A218"/>`,
+ coconut:()=>`<circle cx="32" cy="34" r="22" fill="#7A5334"/><circle cx="32" cy="34" r="17" fill="#FBF7EE"/>${[[28,28],[36,30],[30,38],[38,38],[24,34],[33,44]].map(([x,y])=>`<path d="M${x} ${y}l2.5 1" stroke="#E2D8C3" stroke-width="1.4" stroke-linecap="round"/>`).join('')}<path d="M14 26c2-5 5-8 8-10" stroke="#9C7250" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+ rice:()=>bowl('#FBFAF4',[[22,30,],[28,25],[34,23],[40,27],[45,31],[30,31],[37,31],[18,33],[25,33.5],[42,33.5],[33,28],[26,29]]),
+ atta:()=>`<path d="M17 20h30l5 36c-6 4-34 4-40 0z" fill="#E1CB9E"/><path d="M17 20l-3-8h36l-3 8z" fill="#EFE0BE"/><path d="M20 20c4 3 20 3 24 0" stroke="#A6824B" stroke-width="2.5" fill="none"/><path d="M32 30v18" stroke="#B88A3A" stroke-width="1.8"/>${[32,37,42].map(y=>`<ellipse cx="29" cy="${y}" rx="2.2" ry="3.4" fill="#C79A45" transform="rotate(-25 29 ${y})"/><ellipse cx="35" cy="${y}" rx="2.2" ry="3.4" fill="#C79A45" transform="rotate(25 35 ${y})"/>`).join('')}`,
+ tamarind:()=>[[-18,'#7B4A2A'],[8,'#8E5A34'],[30,'#6A3E22']].map(([r,c])=>`<g transform="rotate(${r} 32 34)"><path d="M16 34c0-4 4-6 8-5s6 6 10 6 6-5 10-5 6 3 6 6-3 6-6 6-6-4-10-4-6 5-10 5-8-5-8-9z" fill="${c}"/></g>`).join(''),
+ jaggery:()=>`<path d="M14 30l18-9 18 9v18l-18 9-18-9z" fill="#B06F28"/><path d="M14 30l18 9 18-9-18-9z" fill="#D39446"/><path d="M32 39v18" stroke="#8C5518" stroke-width="1.4"/>${[[24,28],[36,26],[30,32]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.1" fill="#8C5518"/>`).join('')}`,
+ peanuts:()=>[[20,24,-30],[40,22,20],[24,44,15],[44,42,-20]].map(([x,y,r])=>`<g transform="rotate(${r} ${x} ${y})"><path d="M${x-7} ${y}c0-5 3-7 7-7 3 0 4 3 7 3 4 0 7 2 7 6s-3 6-7 6c-3 0-4 3-7 3-4 0-7-3-7-7z" fill="#D8AD70" stroke="#B08445" stroke-width="1" transform="translate(-4 0)"/></g>`).join(''),
+ curd:()=>`<ellipse cx="32" cy="57" rx="20" ry="3" fill="#000" opacity=".08"/><path d="M10 30h44l-4 18c-2 6-8 9-18 9s-16-3-18-9z" fill="#B2553A"/><ellipse cx="32" cy="30" rx="22" ry="6" fill="#FDFBF5"/><path d="M22 29c4-3 8 1 12-1s6 1 8 0" stroke="#E6E1D3" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M10 36h44" stroke="#8E3F28" stroke-width="1.5"/>`,
+ ghee:()=>`<rect x="16" y="20" width="32" height="36" rx="7" fill="#F2C14E"/><rect x="16" y="20" width="32" height="10" rx="4" fill="#E4AB2E"/><rect x="18" y="12" width="28" height="9" rx="3" fill="#2F6B3A"/><rect x="21" y="34" width="22" height="12" rx="3" fill="#FFF3CF"/><path d="M22 24v24" stroke="#fff" stroke-opacity=".45" stroke-width="3" stroke-linecap="round"/>`,
+ eggs:()=>`<ellipse cx="24" cy="36" rx="12" ry="16" fill="#E6BF95"/><ellipse cx="41" cy="40" rx="12" ry="15" fill="#F6EEDF" stroke="#E0D3BD" stroke-width="1"/><ellipse cx="20" cy="30" rx="3" ry="5" fill="#fff" opacity=".35"/>`,
+ drychilli:()=>`<path d="M10 20c4 18 16 30 40 34-18 3-36-9-40-34z" fill="#9E1F1A"/><path d="M18 12c6 16 18 25 38 26-17 5-34-5-38-26z" fill="#B82A20"/><path d="M10 20c-2-3-1-6 1-7M18 12c-2-3-1-6 1-7" stroke="#4E6A2A" stroke-width="2.5" stroke-linecap="round"/>`,
+ oil:()=>`<rect x="20" y="22" width="24" height="36" rx="6" fill="#E9C24F"/><path d="M24 22l3-8h10l3 8z" fill="#F2D57A"/><rect x="27" y="6" width="10" height="9" rx="2" fill="#B83A2A"/><rect x="23" y="34" width="18" height="12" rx="2" fill="#FFF6D8"/><path d="M25 26v26" stroke="#fff" stroke-opacity=".4" stroke-width="3" stroke-linecap="round"/>`,
+};
+function artSvg(key){const [k,c]=key.split(':');let inner;if(k==='dal')inner=bowl(c);else if(k==='seeds')inner=smallbowl(c,true);else if(k==='powder')inner=smallbowl(c,false);else inner=(ART[k]||ART.tomato)();return `<svg viewBox="0 0 64 64" aria-hidden="true">${inner}</svg>`;}
+const tone=id=>{const c=ING[id]?.cat;return c==='pantry'||c==='spice'?'warm':c==='dairy'?'cool':''};
+const icon=(id,size=40)=>`<span class="ic s${size} ${tone(id)}" title="${esc(ING[id]?.en||'')}">${artSvg(ING[id]?.art||'tomato')}</span>`;
+const heroIngs=d=>{const ids=d.ing.map(x=>x[0]);const core=ids.filter(i=>!['rice','onion','greenchilli','curryleaves','garlic','ginger','tamarind','jaggery'].includes(i));return (core.length?core.concat(ids.filter(i=>!core.includes(i))):ids).slice(0,3)};
+const collage=(d,size=40,cls='')=>`<span class="collage ${cls}">${heroIngs(d).map(i=>icon(i,size)).join('')}</span>`;
+
+/* ============ HELPERS ============ */
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const pad=n=>String(n).padStart(2,'0');
+const keyOf=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parseKey=k=>{const [y,m,d]=k.split('-').map(Number);return new Date(y,m-1,d)};
+const addDays=(d,n)=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()+n);return x};
+const mondayOf=d=>addDays(d,-((d.getDay()+6)%7));
+const dayNum=(d=new Date())=>Math.round(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5);
+const DOW=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const SLOTS=[['b','Breakfast','ఉదయం'],['l','Lunch','మధ్యాహ్నం'],['d','Dinner','రాత్రి']];
+const todayKey=()=>keyOf(new Date());
+function fracStr(q){const w=Math.floor(q+1e-9),r=Math.round((q-w)*100)/100;const f={0.25:'¼',0.5:'½',0.75:'¾'}[r];if(!r)return String(w);if(f)return (w?w:'')+f;return String(Math.round(q*10)/10)}
+function fmtQty(q,unit){
+  if(unit==='g'){if(q>=1000)return (Math.round(q/100)/10)+' kg';return Math.round(q)+' g'}
+  if(unit==='jar')return '';
+  const s=fracStr(q);
+  if(unit==='pcs')return s+(q>1?' pcs':' pc');
+  if(unit==='bunch')return s+(q>1?' bunches':' bunch');
+  if(unit==='bulb')return s+(q>1?' bulbs':' bulb');
+  return s+' '+unit;
+}
+const money=n=>'£'+n.toFixed(2);
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+/* ============ STATE ============ */
+const LS='vantillu.state.v1', LS_UI='vantillu.ui.v1';
+function sampleState(){
+  const t=dayNum();
+  const inv={};
+  const put=(id,q,age=1)=>inv[id]={q,at:t-age};
+  put('brinjal',500,2);put('okra',400,1);put('tomato',1000,2);put('onion',1500,6);put('potato',1500,8);put('greenchilli',100,3);
+  put('curryleaves',1,4);put('coriander',0.5,3);put('ginger',150,6);put('garlic',2,8);put('lemon',3,5);put('bottlegourd',750,5);
+  put('drumstick',3,5);put('spinach',250,3);put('carrot',500,4);put('cabbage',1,5);put('coconut',300,10);
+  put('toordal',800,30);put('moongdal',500,30);put('chanadal',400,30);put('uraddal',600,30);put('wholemoong',300,30);put('rice',4000,20);
+  put('upmarava',500,20);put('idlirava',800,20);put('tamarind',300,40);put('jaggery',400,40);put('peanuts',300,20);put('sesame',100,40);
+  put('curd',800,2);put('ghee',300,30);put('eggs',6,5);put('atta',3000,20);
+  const staples={};Object.values(ING).filter(i=>i.staple).forEach(i=>staples[i.id]='full');staples.cumin='low';
+  return {v:1,people:2,inv,staples,plan:{},cooked:{},bought:{},extras:[],custom:[],sample:true,updatedAt:0};
+}
+function migrate(s){
+  const b=sampleState();
+  s=Object.assign({},b,s||{});
+  for(const k of ['inv','staples','plan','cooked','bought']) if(typeof s[k]!=='object'||!s[k]) s[k]={};
+  if(!Array.isArray(s.extras))s.extras=[]; if(!Array.isArray(s.custom))s.custom=[];
+  return s;
+}
+function loadLocal(){try{const r=localStorage.getItem(LS);if(r)return migrate(JSON.parse(r))}catch(e){}return null}
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}}
+let state=loadLocal();
+let firstRun=false;
+if(!state){state=sampleState();firstRun=true}
+let ui={tab:'today',week:0,day:todayKey(),shop:'week',pantryCat:'all',pantryQ:'',dishCat:'all',dishQ:'',pickIngs:[]};
+if([0,6].includes(new Date().getDay()))ui.shop='both';
+try{const u=JSON.parse(localStorage.getItem(LS_UI)||'{}');if(u.tab)ui.tab=u.tab;if(u.shop)ui.shop=u.shop}catch(e){}
+const saveUi=()=>{try{localStorage.setItem(LS_UI,JSON.stringify({tab:ui.tab,shop:ui.shop}))}catch(e){}};
+
+const allDishes=()=>DISHES.concat(state.custom||[]);
+const dishById=id=>allDishes().find(d=>d.id===id);
+const scale=()=>state.people/2;
+const invQ=id=>state.inv[id]?.q||0;
+function setQ(id,q){q=Math.max(0,Math.round(q*100)/100);const cur=state.inv[id];if(q<=0){delete state.inv[id];return}if(!cur||cur.q<=0)state.inv[id]={q,at:dayNum()};else cur.q=q}
+function addStock(id,q){const cur=invQ(id);if(cur<=0)state.inv[id]={q,at:dayNum()};else state.inv[id].q=Math.round((cur+q)*100)/100}
+function freshness(id){
+  const it=state.inv[id],g=ING[id];if(!it||it.q<=0||!g||g.shelf>60)return null;
+  const age=dayNum()-(it.at??dayNum()),left=g.shelf-age;
+  if(left<=0)return {cls:'bad',txt:'Past best',left};
+  if(age/g.shelf>=0.6)return {cls:'soon',txt:left===1?'Use today':'Use in '+left+'d',left};
+  return {cls:'ok',txt:'Fresh',left};
+}
+const planDay=k=>state.plan[k]||(state.plan[k]={b:[],l:[],d:[]});
+const peekDay=k=>state.plan[k]||{b:[],l:[],d:[]};
+const needFor=(d)=>{const out={};const s=scale();for(const [id,q] of d.ing){let v=q*s;if(ING[id]?.unit==='g')v=Math.ceil(v/5)*5;out[id]=(out[id]||0)+v}return out};
+function slotNeeds(k,slot){const out={};for(const did of peekDay(k)[slot]){const d=dishById(did);if(!d)continue;for(const [id,q] of Object.entries(needFor(d)))out[id]=(out[id]||0)+q}return out}
+function matchInfo(d,inv){inv=inv||Object.fromEntries(Object.entries(state.inv).map(([k,v])=>[k,v.q]));const need=needFor(d);let sum=0,n=0;const missing=[],have=[];for(const [id,q] of Object.entries(need)){const h=Math.min(1,(inv[id]||0)/q);sum+=h;n++;if(h<1)missing.push(id);else have.push(id)}return {pct:n?sum/n:0,missing,have}}
+
+let dirty=false,saveTimer=null;
+function commit(opts={}){state.updatedAt=Date.now();if(!opts.keepSample&&state.sample===true)state.sample='edited';prune();saveLocal();scheduleRemote();render()}
+function prune(){const cutoff=keyOf(addDays(new Date(),-42));for(const k of Object.keys(state.plan))if(k<cutoff)delete state.plan[k];for(const k of Object.keys(state.cooked))if(k.split('|')[0]<cutoff)delete state.cooked[k]}
+
+/* ============ SYNC (Claude artifact db when available) ============ */
+let db=null,docRef=null,remoteReady=false,writing=false,writeAgain=false,firstSnap=true;
+function setSync(on,txt){const el=document.getElementById('sync');el.classList.toggle('on',on);el.querySelector('span').textContent=txt;el.title=on?'Your plan syncs across your devices':'Your plan is saved in this browser'}
+function scheduleRemote(){if(!docRef)return;clearTimeout(saveTimer);saveTimer=setTimeout(pushRemote,900)}
+async function pushRemote(){
+  if(!docRef)return;if(writing){writeAgain=true;return}
+  writing=true;
+  try{await docRef.set({json:JSON.stringify(state),updatedAt:state.updatedAt});setSync(true,'Synced')}
+  catch(e){setSync(false,'Saved on this device');if(e&&e.code==='invalid_argument')docRef=null}
+  writing=false;if(writeAgain){writeAgain=false;pushRemote()}
+}
+(async()=>{
+  try{
+    if(!window.claude||!window.claude.use)return;
+    db=await window.claude.use('db');if(!db)return;
+    docRef=db.doc('planner/state');
+    docRef.onSnapshot(snap=>{
+      remoteReady=true;
+      if(snap.metadata&&snap.metadata.hasPendingWrites)return;
+      const d=snap.exists?snap.data():null;
+      if(d&&d.json&&(d.updatedAt||0)>(state.updatedAt||0)){
+        try{state=migrate(JSON.parse(d.json));saveLocal();render()}catch(e){}
+        setSync(true,'Synced');
+      }else if(firstSnap&&(!d||(d.updatedAt||0)<(state.updatedAt||0))&&state.updatedAt>0){
+        setTimeout(pushRemote,50);
+      }else setSync(true,'Synced');
+      firstSnap=false;
+    },()=>{setSync(false,'Saved on this device')});
+  }catch(e){}
+})();
+
+/* ============ AUTO-PLAN ============ */
+function mainIng(did){const d=dishById(did);return d?heroIngs(d)[0]:null}
+function autoPlan(weekStart,{onlyEmpty=true}={}){
+  const vinv=Object.fromEntries(Object.entries(state.inv).map(([k,v])=>[k,v.q]));
+  const today=todayKey();
+  // reserve stock for meals already planned and not cooked
+  for(let i=0;i<7;i++){const k=keyOf(addDays(weekStart,i));if(k<today)continue;for(const [s] of SLOTS){if(state.cooked[k+'|'+s])continue;for(const [id,q] of Object.entries(slotNeeds(k,s)))vinv[id]=(vinv[id]||0)-q}}
+  const used=new Set();for(let i=0;i<7;i++){const p=peekDay(keyOf(addDays(weekStart,i)));SLOTS.forEach(([s])=>p[s].forEach(x=>used.add(x)))}
+  const soon=new Set(Object.keys(state.inv).filter(id=>{const f=freshness(id);return f&&f.cls!=='ok'}));
+  let filled=0;
+  for(let i=0;i<7;i++){
+    const k=keyOf(addDays(weekStart,i));if(k<today)continue;
+    const p=planDay(k);
+    const dayMains=new Set([...p.b,...p.l,...p.d].map(mainIng));
+    for(const [slot] of SLOTS){
+      if(onlyEmpty&&p[slot].length)continue;
+      const recipe=slot==='b'?['tiffin']:slot==='l'?['pappu','kura','@annam']:(i%2===0?['pulusu','@annam']:['kura','@chapati']);
+      for(const want of recipe){
+        let pick;
+        if(want[0]==='@')pick=dishById(want.slice(1));
+        else{
+          let cands=allDishes().filter(d=>d.cat===want&&d.slots.includes(slot)&&!used.has(d.id));
+          if(!cands.length)cands=allDishes().filter(d=>d.cat===want&&d.slots.includes(slot));
+          let best=null,bs=-1e9;
+          for(const d of cands){
+            const m=matchInfo(d,vinv);
+            const soonHits=d.ing.filter(([id])=>soon.has(id)&&(vinv[id]||0)>0).length;
+            const sc=m.pct*3+soonHits*1.6-(dayMains.has(heroIngs(d)[0])?2.5:0)+Math.random()*0.9;
+            if(sc>bs){bs=sc;best=d}
+          }
+          pick=best;
+        }
+        if(!pick)continue;
+        p[slot].push(pick.id);used.add(pick.id);dayMains.add(heroIngs(pick)[0]);filled++;
+        for(const [id,q] of Object.entries(needFor(pick)))vinv[id]=(vinv[id]||0)-q;
+      }
+    }
+  }
+  return filled;
+}
+
+/* ============ SHOPPING ============ */
+function shopDates(){
+  const t=new Date(),tk=todayKey(),mon=mondayOf(t),out=[];
+  const from=ui.shop==='next'?addDays(mon,7):t;const to=ui.shop==='week'?addDays(mon,6):addDays(mon,13);
+  for(let d=new Date(from.getFullYear(),from.getMonth(),from.getDate());d<=to;d=addDays(d,1)){const k=keyOf(d);if(k>=tk)out.push(k)}
+  return out;
+}
+function shopList(){
+  const need={},why={};
+  for(const k of shopDates())for(const [s] of SLOTS){if(state.cooked[k+'|'+s])continue;for(const did of peekDay(k)[s]){const d=dishById(did);if(!d)continue;for(const [id,q] of Object.entries(needFor(d))){need[id]=(need[id]||0)+q;(why[id]||(why[id]=new Set())).add(d.en)}}}
+  const items=[];
+  for(const [id,q] of Object.entries(need)){const g=ING[id];if(!g||g.staple)continue;const short=q-invQ(id);if(short>1e-6){const packs=Math.max(1,Math.ceil(short/g.pack-1e-9));items.push({id,need:q,have:invQ(id),short,packs,cost:packs*g.price,why:[...why[id]]})}}
+  for(const g of Object.values(ING))if(g.staple&&state.staples[g.id]&&state.staples[g.id]!=='full')items.push({id:g.id,staple:true,packs:1,cost:g.price,why:[state.staples[g.id]==='out'?'Run out':'Running low']});
+  for(const id of state.extras)if(ING[id]&&!items.find(x=>x.id===id))items.push({id,extra:true,packs:1,cost:ING[id].price,why:['Added by you']});
+  const order=Object.keys(ING);items.sort((a,b)=>order.indexOf(a.id)-order.indexOf(b.id));
+  return items;
+}
+
+/* ============ RENDER ============ */
+const $=s=>document.querySelector(s);
+const TAB_ICONS={
+ today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 13h16a8 8 0 0 1-16 0z"/><path d="M9 9c0-2 2-2 2-4M13 9c0-2 2-2 2-4"/></svg>',
+ week:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+ shop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1.5 12h-11z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>',
+ pantry:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M4 12h16M9 7h6M9 16h6"/></svg>',
+ dishes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></svg>',
+};
+function renderTabs(){
+  const n=shopList().filter(x=>!state.bought[x.id]).length;
+  const tabs=[['today','Today'],['week','Week'],['shop','Shop'],['pantry','Pantry'],['dishes','Dishes']];
+  $('#tabs').innerHTML=tabs.map(([id,l])=>`<button class="tab" data-act="tab" data-id="${id}" ${ui.tab===id?'aria-current="page"':''}>${TAB_ICONS[id]}<span>${l}</span>${id==='shop'&&n?`<span class="badge num">${n}</span>`:''}</button>`).join('');
+  $('#peopleN').textContent=state.people;
+}
+function render(){renderTabs();const m=$('#main');const f={today:vToday,week:vWeek,shop:vShop,pantry:vPantry,dishes:vDishes}[ui.tab]||vToday;m.innerHTML=(state.sample===true?sampleBanner():'')+f();}
+function sampleBanner(){return `<div class="banner"><span><b>Starter pantry and plan.</b> These are example items so you can see how it works. Adjust the pantry to what's in your kitchen, or start from empty.</span><span class="row"><button class="btn sm" data-act="sampleKeep">Keep and edit</button><button class="btn sm warn" data-act="sampleClear">Start empty</button></span></div>`}
+
+function weekStart(){return addDays(mondayOf(new Date()),ui.week*7)}
+function dayStrip(){
+  const ws=mondayOf(parseKey(ui.day)),tk=todayKey();
+  return `<div class="days">${Array.from({length:7},(_,i)=>{const d=addDays(ws,i),k=keyOf(d),p=peekDay(k);return `<button class="day ${k===tk?'today':''}" data-act="pickDay" data-k="${k}" aria-pressed="${k===ui.day}"><small>${DOW[i]}</small><b class="num">${d.getDate()}</b><span class="dots">${SLOTS.map(([s])=>`<i class="${state.cooked[k+'|'+s]?'c':p[s].length?'p':''}"></i>`).join('')}</span></button>`}).join('')}</div>`;
+}
+function ingTags(d){const need=needFor(d);return `<div class="ing-list">${Object.entries(need).map(([id,q])=>{const short=invQ(id)<q-1e-6;return `<span class="ing-tag ${short?'short':''}">${icon(id,24)}${esc(ING[id].en)} · ${fmtQty(q,ING[id].unit)}</span>`}).join('')}</div>`}
+function vToday(){
+  const k=ui.day,d=parseKey(k),p=peekDay(k),tk=todayKey();
+  const label=k===tk?'Today':k===keyOf(addDays(new Date(),1))?'Tomorrow':DOW[(d.getDay()+6)%7];
+  const meals=SLOTS.map(([s,name,te])=>{
+    const cooked=state.cooked[k+'|'+s];
+    const dishes=p[s].map(dishById).filter(Boolean);
+    const short=Object.entries(slotNeeds(k,s)).filter(([id,q])=>invQ(id)<q-1e-6);
+    const status=cooked?'<span class="pill ok">Cooked</span>':!dishes.length?'<span class="pill plain">Not planned</span>':short.length&&!cooked?`<span class="pill bad">Missing ${short.length}</span>`:'<span class="pill ok">Ready to cook</span>';
+    return `<section class="card meal ${cooked?'done':''}">
+      <div class="meal-h"><div class="row"><h3>${name}</h3><span class="te">${te}</span>${status}</div>
+        <div class="row">${dishes.length?`<button class="btn sm ${cooked?'':'primary'}" data-act="cook" data-k="${k}" data-s="${s}">${cooked?'Undo cooked':'Mark as cooked'}</button>`:''}<button class="btn sm" data-act="openPicker" data-k="${k}" data-s="${s}">${dishes.length?'Change':'Add dish'}</button></div></div>
+      ${dishes.length?dishes.map(dd=>`<div class="dish-row">${collage(dd,40)}<div><h4>${esc(dd.en)} <span class="te">${esc(dd.te||'')}</span></h4><div class="small muted">${DISH_CATS[dd.cat]||''} · ${dd.mins} min</div>${ingTags(dd)}<details class="method"><summary>How to cook</summary><p>${esc(dd.steps||'')}</p></details></div><button class="btn sm" data-act="dish" data-id="${dd.id}" aria-label="Open ${esc(dd.en)}">Open</button></div>`).join(''):`<div class="empty-slot"><span>Nothing planned yet.</span><button class="btn sm primary" data-act="openPicker" data-k="${k}" data-s="${s}">Pick a dish</button></div>`}
+      ${short.length&&!cooked?`<div class="small" style="color:var(--chilli)">Short on: ${short.map(([id,q])=>`${esc(ING[id].en)} (need ${fmtQty(q,ING[id].unit)}, have ${fmtQty(invQ(id),ING[id].unit)||'0'})`).join(', ')}</div>`:''}
+    </section>`}).join('');
+  const soon=Object.keys(state.inv).map(id=>({id,f:freshness(id)})).filter(x=>x.f&&x.f.cls!=='ok').sort((a,b)=>a.f.left-b.f.left);
+  const soonHtml=soon.length?soon.map(({id,f})=>{const ds=allDishes().filter(d=>d.ing.some(x=>x[0]===id)).slice(0,2).map(d=>d.en).join(', ');return `<div class="soon-item">${icon(id,40)}<div class="grow"><b>${esc(ING[id].en)}</b> <span class="small muted num">${fmtQty(invQ(id),ING[id].unit)}</span><div class="small muted">${esc(ds)}</div></div><span class="pill ${f.cls}">${f.txt}</span></div>`}).join(''):'<p class="small muted">Nothing is close to its best-before. Nice.</p>';
+  const list=shopList(),open=list.filter(x=>!state.bought[x.id]);
+  return `<div class="section-h"><div><div class="eyebrow">${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}</div><h2>${label}'s cooking</h2></div><div class="row"><button class="btn sm" data-act="dayShift" data-d="-7" aria-label="Previous week">‹ Week</button><button class="btn sm" data-act="goToday">Today</button><button class="btn sm" data-act="dayShift" data-d="7" aria-label="Next week">Week ›</button></div></div>
+  ${dayStrip()}
+  <div class="today-grid"><div>${meals}</div>
+  <aside class="side"><div class="card"><h3>Use these soon</h3>${soonHtml}</div>
+  <div class="card"><h3>Shopping</h3><p class="small muted" style="margin:0 0 10px">${open.length?`${open.length} item${open.length>1?'s':''} to buy for the rest of this week, about <b class="num">${money(open.reduce((a,b)=>a+b.cost,0))}</b>.`:'Everything for this week is in your pantry.'}</p><button class="btn sm" data-act="tab" data-id="shop">Open shopping list</button></div></aside></div>`;
+}
+
+function vWeek(){
+  const ws=weekStart(),we=addDays(ws,6),tk=todayKey();
+  let planned=0,cooked=0;const vegs=new Set();
+  for(let i=0;i<7;i++){const k=keyOf(addDays(ws,i)),p=peekDay(k);for(const [s] of SLOTS){if(p[s].length)planned++;if(state.cooked[k+'|'+s])cooked++;p[s].forEach(did=>{const d=dishById(did);if(d)d.ing.forEach(([id])=>{if(ING[id]&&(ING[id].cat==='veg'||ING[id].cat==='leafy')&&!['onion','greenchilli','ginger','garlic','curryleaves','coriander','tomato'].includes(id))vegs.add(id)})})}}
+  const saveUiShop=ui.shop;ui.shop=ui.week===0?'week':ui.week===1?'next':'week';const cost=ui.week<=1?shopList().filter(x=>!state.bought[x.id]).reduce((a,b)=>a+b.cost,0):null;ui.shop=saveUiShop;
+  const range=`${ws.getDate()} ${MON[ws.getMonth()]} – ${we.getDate()} ${MON[we.getMonth()]}`;
+  let grid=`<div class="week"><div class="corner"></div>${Array.from({length:7},(_,i)=>{const d=addDays(ws,i);return `<div class="wh ${keyOf(d)===tk?'today':''}">${DOW[i]}<b class="num">${d.getDate()}</b></div>`}).join('')}`;
+  // desktop: row-major by slot; mobile: per-day groups. Build per-day groups and use CSS order for desktop.
+  const cells=[];
+  for(let i=0;i<7;i++){const d=addDays(ws,i),k=keyOf(d),p=peekDay(k);
+    cells.push({i,k,d,html:SLOTS.map(([s,name])=>{const c=state.cooked[k+'|'+s];return `<div class="cell ${k<tk?'past':''} ${c?'cooked':''}" style="grid-row:${SLOTS.findIndex(x=>x[0]===s)+2};grid-column:${i+2}"><span class="lbl">${name}${c?' · cooked':''}</span>${p[s].map(did=>{const dd=dishById(did);if(!dd)return'';return `<div class="dchip">${icon(heroIngs(dd)[0],24)}<button class="n" data-act="dish" data-id="${dd.id}">${esc(dd.en)}</button><button class="x" data-act="rm" data-k="${k}" data-s="${s}" data-id="${dd.id}" aria-label="Remove ${esc(dd.en)}">×</button></div>`}).join('')}<button class="add" data-act="openPicker" data-k="${k}" data-s="${s}">+ Add</button></div>`}).join('')});
+  }
+  grid+=SLOTS.map(([s,name],r)=>`<div class="sl" style="grid-row:${r+2};grid-column:1">${name}</div>`).join('');
+  grid+=cells.map(c=>`<div class="wday"><div class="wday-h"><b>${DOW[c.i]} ${c.d.getDate()}</b>${c.k===tk?'<span class="pill ok">Today</span>':''}</div>${c.html}</div>`).join('')+'</div>';
+  return `<div class="section-h"><div><div class="eyebrow">Weekly menu</div><h2>Plan the week</h2><p>Tap + Add to choose dishes for any meal, or let Auto-plan fill the empty slots from your pantry, using up what's close to its best-before first.</p></div></div>
+  <div class="week-bar"><button class="btn sm" data-act="week" data-d="-1" aria-label="Previous week">‹</button><span class="range num">${range}</span><button class="btn sm" data-act="week" data-d="1" aria-label="Next week">›</button>${ui.week!==0?'<button class="btn sm" data-act="week" data-d="0">This week</button>':''}<span style="flex:1"></span><button class="btn primary" data-act="auto">✦ Auto-plan empty slots</button><button class="btn warn" data-act="clearWeek" id="clearBtn">Clear week</button></div>
+  <div class="stats"><div class="card stat"><span class="eyebrow">Meals planned</span><b class="num">${planned}/21</b></div><div class="card stat"><span class="eyebrow">Cooked</span><b class="num">${cooked}</b></div><div class="card stat"><span class="eyebrow">Different veg</span><b class="num">${vegs.size}</b></div><div class="card stat"><span class="eyebrow">Still to buy</span><b class="num">${cost==null?'—':money(cost)}</b></div></div>
+  ${grid}`;
+}
+
+function vShop(){
+  const items=shopList(),groups={asian:[],super:[],both:[]};items.forEach(x=>groups[ING[x.id].store].push(x));
+  const open=items.filter(x=>!state.bought[x.id]),got=items.filter(x=>state.bought[x.id]);
+  const row=x=>{const g=ING[x.id],b=!!state.bought[x.id];return `<label class="item ${b?'got':''}"><input type="checkbox" class="tick" data-act="buy" data-id="${x.id}" ${b?'checked':''} aria-label="Bought ${esc(g.en)}">${icon(x.id,40)}<span><span class="nm">${esc(g.en)}</span> <span class="te small">${esc(g.te)}</span><span class="why" style="display:block">${x.staple||x.extra?esc(x.why.join(', ')):'For '+esc(x.why.slice(0,3).join(', '))+(x.why.length>3?' +'+(x.why.length-3):'')}${g.note?' · '+esc(g.note):''}</span></span><span class="amt num"><b>${x.staple?'1 '+(g.id==='oil'?'bottle':'pack'):fmtQty(x.packs*g.pack,g.unit)}</b>${x.staple||x.extra?'':`need ${fmtQty(x.short,g.unit)} · `}${money(x.cost)}</span></label>`};
+  const stores=['asian','super','both'].filter(s=>groups[s].length).map(s=>`<section class="card store"><div class="store-h"><h3>${STORES[s]}</h3><span class="small muted num">${groups[s].filter(x=>!state.bought[x.id]).length} to get · ${money(groups[s].reduce((a,b)=>a+b.cost,0))}</span></div>${groups[s].map(row).join('')}</section>`).join('');
+  const total=open.reduce((a,b)=>a+b.cost,0);
+  const dates=shopDates();
+  return `<div class="section-h"><div><div class="eyebrow">Shopping list</div><h2>What to buy</h2><p>Built from meals you haven't cooked yet, minus what's already in your pantry, rounded up to the pack sizes shops sell.</p></div>
+  <div class="chips">${[['week','Rest of this week'],['next','Next week'],['both','Both weeks']].map(([id,l])=>`<button class="chip" data-act="shopRange" data-id="${id}" aria-pressed="${ui.shop===id}">${l}</button>`).join('')}</div></div>
+  <div class="shop-grid"><div>${items.length?stores:`<div class="card empty"><h3>Nothing to buy</h3><p>${dates.length?'Your pantry covers every planned meal in this range.':'No days left in this range.'} Plan more meals in the Week tab, or tap "Add to list" on anything in the Pantry.</p></div>`}</div>
+  <aside class="card summary"><span class="eyebrow">Estimated spend</span><div class="total num">${money(total)}</div><p class="small muted" style="margin:6px 0 0">${open.length} item${open.length===1?'':'s'} left · ${got.length} in basket. Prices are rough Aberdeen averages.</p>
+  <hr><button class="btn primary" data-act="putAway" ${got.length?'':'disabled'} style="width:100%;justify-content:center">Put ${got.length||''} bought item${got.length===1?'':'s'} in pantry</button>
+  <p class="small muted">Tick things off as you shop. When you're home, this adds them to your pantry with today's date.</p>
+  <hr><button class="btn" data-act="copy" style="width:100%;justify-content:center">Copy list for WhatsApp / Notes</button><textarea class="copybox" id="copyBox" readonly hidden aria-label="Shopping list text"></textarea></aside></div>`;
+}
+
+function vPantry(){
+  const q=ui.pantryQ.toLowerCase();
+  const cats=ui.pantryCat==='all'?Object.keys(CATS):[ui.pantryCat];
+  const inStock=Object.values(ING).filter(g=>!g.staple&&invQ(g.id)>0).length;
+  const soonN=Object.keys(state.inv).filter(id=>{const f=freshness(id);return f&&f.cls!=='ok'}).length;
+  const tile=g=>{
+    if(g.staple){const st=state.staples[g.id]||'full';return `<div class="card tile">${`<div class="top-row">${icon(g.id,56)}<div><div class="nm">${esc(g.en)}</div><span class="te">${esc(g.te)}</span></div></div>`}<div class="meta">${g.note?`<span class="note">${esc(g.note)}</span>`:''}</div><div class="seg" role="group" aria-label="${esc(g.en)} level">${['full','low','out'].map(v=>`<button class="${v}" data-act="staple" data-id="${g.id}" data-v="${v}" aria-pressed="${st===v}">${v==='full'?'Stocked':v==='low'?'Low':'Out'}</button>`).join('')}</div></div>`}
+    const qn=invQ(g.id),f=freshness(g.id),onList=state.extras.includes(g.id);
+    return `<div class="card tile ${qn>0?'':'out'}"><div class="top-row">${icon(g.id,56)}<div><div class="nm">${esc(g.en)}</div><span class="te">${esc(g.te)}</span></div></div>
+    <div class="meta">${f?`<span class="pill ${f.cls}">${f.txt}</span>`:''}<span class="pill plain">${STORES[g.store]}</span></div>
+    <div class="foot"><div class="stepper"><button data-act="qty" data-id="${g.id}" data-d="-1" aria-label="Less ${esc(g.en)}">−</button><span>${qn>0?fmtQty(qn,g.unit):'None'}</span><button data-act="qty" data-id="${g.id}" data-d="1" aria-label="More ${esc(g.en)}">+</button></div><button class="listbtn" data-act="extra" data-id="${g.id}" aria-pressed="${onList}">${onList?'✓ On list':'+ List'}</button></div></div>`};
+  const body=cats.map(c=>{const list=Object.values(ING).filter(g=>g.cat===c&&(!q||g.en.toLowerCase().includes(q)||g.te.includes(ui.pantryQ)||g.note.toLowerCase().includes(q)));if(!list.length)return'';return `<div class="cat-h"><h3>${CATS[c]}</h3><span class="small muted">${c==='spice'?'Tap the level when a jar runs low':list.filter(g=>invQ(g.id)>0).length+' of '+list.length+' in stock'}</span></div><div class="grid-tiles">${list.map(tile).join('')}</div>`}).join('');
+  return `<div class="section-h"><div><div class="eyebrow">Inventory</div><h2>Pantry & fridge</h2><p>${inStock} items in stock${soonN?`, <b>${soonN}</b> to use soon`:''}. Use − and + to match what you have. Cooking a meal takes its ingredients out automatically.</p></div>
+  <input class="search" id="pantryQ" type="search" placeholder="Search groceries" value="${esc(ui.pantryQ)}" aria-label="Search groceries"></div>
+  <div class="chips">${[['all','All'],...Object.entries(CATS)].map(([id,l])=>`<button class="chip" data-act="pantryCat" data-id="${id}" aria-pressed="${ui.pantryCat===id}">${l}</button>`).join('')}</div>
+  <div id="pantryBody">${body||'<div class="empty">No groceries match that search.</div>'}</div>`;
+}
+
+function dishCard(d){const m=matchInfo(d);const pct=Math.round(m.pct*100);return `<button class="dcard" data-act="dish" data-id="${d.id}">${collage(d,56,'big')}<div><h4>${esc(d.en)}</h4><span class="te">${esc(d.te||'')}</span></div><div class="meter ${pct>=100?'':pct>=60?'mid':'low'}"><i style="width:${pct}%"></i></div><div class="foot"><span>${pct>=100?'You have everything':m.missing.length+' to buy: '+m.missing.slice(0,2).map(i=>ING[i].en).join(', ')+(m.missing.length>2?'…':'')}</span><span class="num">${d.mins} min</span></div></button>`}
+function dishListHtml(){
+  const q=ui.dishQ.toLowerCase();
+  let list=allDishes().filter(d=>(ui.dishCat==='all'||d.cat===ui.dishCat)&&(!q||d.en.toLowerCase().includes(q)||(d.te||'').includes(ui.dishQ))&&ui.pickIngs.every(id=>d.ing.some(x=>x[0]===id)));
+  list=list.map(d=>({d,m:matchInfo(d).pct})).sort((a,b)=>b.m-a.m).map(x=>x.d);
+  return list.length?`<div class="dish-grid">${list.map(dishCard).join('')}</div>`:'<div class="card empty">No dishes use all of those together. Tap an ingredient again to remove it.</div>';
+}
+function vDishes(){
+  const vegIds=Object.values(ING).filter(g=>g.cat==='veg'||g.cat==='leafy').filter(g=>DISHES.some(d=>d.ing.some(x=>x[0]===g.id))).map(g=>g.id);
+  return `<div class="section-h"><div><div class="eyebrow">Andhra recipes</div><h2>Find a dish</h2><p>Tap the vegetables you want to cook with and see which dishes combine them. The bar shows how much of each dish your pantry already covers.</p></div><div class="row"><input class="search" id="dishQ" type="search" placeholder="Search dishes" value="${esc(ui.dishQ)}" aria-label="Search dishes"><button class="btn primary" data-act="newDish">+ Your own dish</button></div></div>
+  <div class="pickers" role="group" aria-label="Pick vegetables">${vegIds.map(id=>`<button class="pickv" data-act="pickIng" data-id="${id}" aria-pressed="${ui.pickIngs.includes(id)}">${icon(id,40)}<span>${esc(ING[id].en)}</span></button>`).join('')}</div>
+  <div class="chips" style="margin-bottom:14px">${[['all','All dishes'],...Object.entries(DISH_CATS)].map(([id,l])=>`<button class="chip" data-act="dishCat" data-id="${id}" aria-pressed="${ui.dishCat===id}">${l}</button>`).join('')}${ui.pickIngs.length?'<button class="chip" data-act="clearPick">Clear vegetables ×</button>':''}</div>
+  <div id="dishBody">${dishListHtml()}</div>`;
+}
+
+/* ============ SHEETS ============ */
+let sheetCtx=null;
+function openSheet(html,ctx){sheetCtx=ctx||null;$('#sheet').innerHTML=html;$('#sheetWrap').hidden=false;document.body.style.overflow='hidden';const f=$('#sheet').querySelector('input,button');f&&f.focus({preventScroll:true})}
+function closeSheet(){$('#sheetWrap').hidden=true;document.body.style.overflow='';sheetCtx=null}
+function pickerHtml(){
+  const {k,s,q='',all=false}=sheetCtx,d=parseKey(k),slotName=SLOTS.find(x=>x[0]===s)[1],cur=peekDay(k)[s];
+  let list=allDishes().filter(dd=>(all||dd.slots.includes(s))&&(!q||dd.en.toLowerCase().includes(q.toLowerCase())||(dd.te||'').includes(q)));
+  list=list.map(dd=>({dd,m:matchInfo(dd)})).sort((a,b)=>(cur.includes(b.dd.id)-cur.includes(a.dd.id))||(b.m.pct-a.m.pct));
+  return `<div class="sheet-h"><div><div class="eyebrow">${DOW[(d.getDay()+6)%7]} ${d.getDate()} ${MON[d.getMonth()]}</div><h2>${slotName}</h2><p class="small muted" style="margin:4px 0 0">Tap to add or remove. A typical Andhra lunch is a pappu, a kura and annam.</p></div><button class="close" data-act="closeSheet" aria-label="Close">×</button></div>
+  <div class="row"><input class="search" id="pickQ" type="search" placeholder="Search dishes" value="${esc(q)}" aria-label="Search dishes" style="max-width:none;flex:1"><button class="chip" data-act="pickAll" aria-pressed="${all}">Show all dishes</button></div>
+  <div class="pick-list" id="pickList">${list.map(({dd,m})=>{const inn=cur.includes(dd.id);return `<button class="pick ${inn?'in':''}" data-act="togglePick" data-id="${dd.id}" aria-pressed="${inn}">${collage(dd,40)}<span><h4>${esc(dd.en)} <span class="te">${esc(dd.te||'')}</span></h4>${m.missing.length?`<span class="miss">Need ${m.missing.slice(0,3).map(i=>esc(ING[i].en)).join(', ')}${m.missing.length>3?'…':''}</span>`:'<span class="have">All ingredients in pantry</span>'}<span class="small muted"> · ${DISH_CATS[dd.cat]}</span></span><span class="pill ${inn?'ok':'plain'}">${inn?'✓ Added':'Add'}</span></button>`}).join('')||'<div class="empty">No dishes match.</div>'}</div>
+  <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn primary" data-act="closeSheet">Done</button></div>`;
+}
+function dishSheet(id){
+  const d=dishById(id);if(!d)return;const need=needFor(d),ws=weekStart();
+  const isCustom=(state.custom||[]).some(x=>x.id===id);
+  openSheet(`<div class="sheet-h"><div class="row">${collage(d,72,'big')}</div><button class="close" data-act="closeSheet" aria-label="Close">×</button></div>
+  <h2 style="font-size:30px">${esc(d.en)}</h2><div class="te" style="font-size:20px">${esc(d.te||'')}</div>
+  <div class="row small muted" style="margin-top:6px"><span class="pill plain">${DISH_CATS[d.cat]}</span><span>${d.mins} min</span><span>Quantities for ${state.people} ${state.people===1?'person':'people'}</span></div>
+  <div class="detail-ings">${Object.entries(need).map(([iid,q])=>{const ok=invQ(iid)>=q-1e-6;return `<div class="di">${icon(iid,40)}<div class="grow"><b>${esc(ING[iid].en)}</b> <span class="te small">${esc(ING[iid].te)}</span><div class="num">${fmtQty(q,ING[iid].unit)}</div></div><span class="pill ${ok?'ok':'bad'}">${ok?'Have':'Buy'}</span></div>`}).join('')}</div>
+  <p class="small muted" style="margin:0 0 4px">Plus the usual tadka box: oil, mustard, cumin, dry chillies, turmeric, chilli powder, salt.</p>
+  ${d.steps?`<h3 style="font-size:19px;margin-top:14px">How to cook</h3><p style="max-width:65ch">${esc(d.steps)}</p>`:''}
+  <h3 style="font-size:19px;margin-top:14px">Add to this week</h3>
+  <div class="row" style="margin-top:8px"><select id="addDay" class="search" aria-label="Day">${Array.from({length:7},(_,i)=>{const x=addDays(ws,i);return `<option value="${keyOf(x)}" ${keyOf(x)===todayKey()?'selected':''}>${DOW[i]} ${x.getDate()} ${MON[x.getMonth()]}</option>`}).join('')}</select>
+  <select id="addSlot" class="search" aria-label="Meal">${SLOTS.map(([s,n])=>`<option value="${s}" ${s===(d.slots.includes('l')?'l':d.slots[0])?'selected':''}>${n}</option>`).join('')}</select>
+  <button class="btn primary" data-act="addToPlan" data-id="${d.id}">Add</button></div>
+  ${isCustom?`<div class="row" style="margin-top:18px"><button class="btn warn sm" data-act="delDish" data-id="${d.id}" id="delDishBtn">Delete this dish</button></div>`:''}`,{dish:id});
+}
+function builderHtml(){
+  const b=sheetCtx.b;
+  return `<div class="sheet-h"><div><div class="eyebrow">Your recipe</div><h2>Build a dish</h2><p class="small muted" style="margin:4px 0 0">Tap the groceries that go into it. Quantities are for 2 people.</p></div><button class="close" data-act="closeSheet" aria-label="Close">×</button></div>
+  <div class="row" style="align-items:end"><label class="field" style="flex:2;min-width:180px">Dish name<input id="bName" value="${esc(b.en)}" placeholder="e.g. Vankaya Tomato Kura"></label><label class="field" style="flex:1;min-width:140px">Telugu name (optional)<input id="bTe" value="${esc(b.te)}"></label>
+  <label class="field" style="flex:1;min-width:140px">Type<select id="bCat">${Object.entries(DISH_CATS).map(([k,v])=>`<option value="${k}" ${b.cat===k?'selected':''}>${v}</option>`).join('')}</select></label></div>
+  <div class="row" style="margin-top:12px">${b.ing.length?b.ing.map(([id,q],i)=>`<span class="ing-tag" style="padding-right:4px">${icon(id,24)}${esc(ING[id].en)}<span class="stepper" style="margin-left:4px"><button data-act="bQty" data-i="${i}" data-d="-1" aria-label="Less">−</button><span>${fmtQty(q,ING[id].unit)}</span><button data-act="bQty" data-i="${i}" data-d="1" aria-label="More">+</button></span></span>`).join(''):'<span class="small muted">No groceries picked yet.</span>'}</div>
+  <div class="pickers" style="flex-wrap:wrap;overflow:visible;margin-top:12px">${Object.values(ING).filter(g=>!g.staple).map(g=>`<button class="pickv" data-act="bIng" data-id="${g.id}" aria-pressed="${b.ing.some(x=>x[0]===g.id)}">${icon(g.id,40)}<span>${esc(g.en)}</span></button>`).join('')}</div>
+  <div class="row" style="justify-content:flex-end;margin-top:12px"><span class="small muted" id="bErr" style="color:var(--chilli)"></span><button class="btn primary" data-act="bSave">Save dish</button></div>`;
+}
+function syncBuilderFields(){const b=sheetCtx&&sheetCtx.b;if(!b)return;const n=$('#bName'),t=$('#bTe'),c=$('#bCat');if(n)b.en=n.value;if(t)b.te=t.value;if(c)b.cat=c.value}
+
+/* ============ TOAST ============ */
+let toastT;function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2400)}
+
+/* ============ EVENTS ============ */
+let clearArmed=false,delArmed=false;
+const A={
+ tab:el=>{ui.tab=el.dataset.id;saveUi();closeSheet();render();window.scrollTo({top:0})},
+ people:el=>{state.people=Math.min(12,Math.max(1,state.people+Number(el.dataset.d)));commit({keepSample:true})},
+ sampleKeep:()=>{state.sample=false;commit()},
+ sampleClear:()=>{state.inv={};state.plan={};state.cooked={};state.bought={};state.extras=[];Object.keys(state.staples).forEach(k=>state.staples[k]='full');state.sample=false;commit();toast('Pantry and plan cleared')},
+ pickDay:el=>{ui.day=el.dataset.k;render()},
+ goToday:()=>{ui.day=todayKey();render()},
+ dayShift:el=>{ui.day=keyOf(addDays(parseKey(ui.day),Number(el.dataset.d)));render()},
+ cook:el=>{
+   const {k,s}=el.dataset,key=k+'|'+s;
+   if(state.cooked[key]){for(const [id,q] of Object.entries(state.cooked[key].used||{}))addStock(id,q);delete state.cooked[key];commit();toast('Ingredients returned to pantry')}
+   else{const used={};for(const [id,q] of Object.entries(slotNeeds(k,s))){const h=invQ(id),u=Math.min(h,q);if(u>0){setQ(id,h-u);used[id]=u}}state.cooked[key]={used,at:Date.now()};commit();toast('Enjoy! Pantry updated')}
+ },
+ openPicker:el=>{openSheet('',{k:el.dataset.k,s:el.dataset.s,q:'',all:false});$('#sheet').innerHTML=pickerHtml()},
+ pickAll:()=>{sheetCtx.all=!sheetCtx.all;$('#sheet').innerHTML=pickerHtml()},
+ togglePick:el=>{const {k,s}=sheetCtx,p=planDay(k)[s],id=el.dataset.id,i=p.indexOf(id);if(i>=0)p.splice(i,1);else p.push(id);commit();const y=$('#sheet').scrollTop;$('#sheet').innerHTML=pickerHtml();$('#sheet').scrollTop=y},
+ closeSheet:()=>{closeSheet()},
+ rm:el=>{const p=planDay(el.dataset.k)[el.dataset.s],i=p.indexOf(el.dataset.id);if(i>=0)p.splice(i,1);commit()},
+ week:el=>{const d=Number(el.dataset.d);ui.week=d===0?0:ui.week+d;clearArmed=false;render()},
+ auto:()=>{const n=autoPlan(weekStart());commit();toast(n?`Added ${n} dish${n>1?'es':''} to empty slots`:'No empty slots left to fill')},
+ clearWeek:el=>{
+   if(!clearArmed){clearArmed=true;el.textContent='Tap again to clear';setTimeout(()=>{clearArmed=false;const b=$('#clearBtn');if(b)b.textContent='Clear week'},3000);return}
+   clearArmed=false;const ws=weekStart(),tk=todayKey();for(let i=0;i<7;i++){const k=keyOf(addDays(ws,i));if(k<tk)continue;if(state.plan[k])SLOTS.forEach(([s])=>{if(!state.cooked[k+'|'+s])state.plan[k][s]=[]})}commit();toast('Upcoming meals cleared')},
+ shopRange:el=>{ui.shop=el.dataset.id;saveUi();render()},
+ buy:el=>{const id=el.dataset.id;if(el.checked)state.bought[id]=true;else delete state.bought[id];commit({keepSample:true})},
+ putAway:()=>{const items=shopList();let n=0;for(const x of items){if(!state.bought[x.id])continue;const g=ING[x.id];if(g.staple)state.staples[g.id]='full';else addStock(x.id,x.packs*g.pack);state.extras=state.extras.filter(e=>e!==x.id);n++}state.bought={};commit();toast(`${n} item${n===1?'':'s'} added to pantry`)},
+ copy:()=>{
+   const items=shopList().filter(x=>!state.bought[x.id]);const by={asian:[],super:[],both:[]};items.forEach(x=>by[ING[x.id].store].push(x));
+   let txt=`Vantillu shopping list · ${new Date().getDate()} ${MON[new Date().getMonth()]}\n`;
+   for(const s of ['asian','super','both'])if(by[s].length){txt+=`\n${STORES[s].toUpperCase()}\n`+by[s].map(x=>{const g=ING[x.id];return `☐ ${g.en} (${g.te}) — ${x.staple?'1 pack':fmtQty(x.packs*g.pack,g.unit)}`}).join('\n')+'\n'}
+   txt+=`\nApprox. ${money(items.reduce((a,b)=>a+b.cost,0))}`;
+   const box=$('#copyBox');box.value=txt;
+   const fallback=()=>{box.hidden=false;box.focus();box.select();toast('Select all and copy the list below')};
+   try{navigator.clipboard.writeText(txt).then(()=>toast('Shopping list copied'),fallback)}catch(e){fallback()}
+ },
+ qty:el=>{const g=ING[el.dataset.id],d=Number(el.dataset.d);setQ(g.id,invQ(g.id)+d*g.step);commit()},
+ staple:el=>{state.staples[el.dataset.id]=el.dataset.v;commit()},
+ extra:el=>{const id=el.dataset.id;state.extras=state.extras.includes(id)?state.extras.filter(x=>x!==id):state.extras.concat(id);commit();toast(state.extras.includes(id)?`${ING[id].en} added to shopping list`:`${ING[id].en} removed from list`)},
+ pantryCat:el=>{ui.pantryCat=el.dataset.id;render()},
+ dishCat:el=>{ui.dishCat=el.dataset.id;render()},
+ pickIng:el=>{const id=el.dataset.id;ui.pickIngs=ui.pickIngs.includes(id)?ui.pickIngs.filter(x=>x!==id):ui.pickIngs.concat(id);render()},
+ clearPick:()=>{ui.pickIngs=[];render()},
+ dish:el=>{delArmed=false;dishSheet(el.dataset.id)},
+ addToPlan:el=>{const k=$('#addDay').value,s=$('#addSlot').value,p=planDay(k)[s];if(!p.includes(el.dataset.id))p.push(el.dataset.id);commit();closeSheet();const d=parseKey(k);toast(`Added to ${DOW[(d.getDay()+6)%7]} ${SLOTS.find(x=>x[0]===s)[1].toLowerCase()}`)},
+ delDish:el=>{if(!delArmed){delArmed=true;el.textContent='Tap again to delete';return}const id=el.dataset.id;state.custom=state.custom.filter(d=>d.id!==id);for(const p of Object.values(state.plan))SLOTS.forEach(([s])=>{p[s]=p[s].filter(x=>x!==id)});commit();closeSheet();toast('Dish deleted')},
+ newDish:()=>{openSheet('',{b:{en:'',te:'',cat:'kura',ing:[]}});$('#sheet').innerHTML=builderHtml()},
+ bIng:el=>{syncBuilderFields();const b=sheetCtx.b,id=el.dataset.id,i=b.ing.findIndex(x=>x[0]===id);if(i>=0)b.ing.splice(i,1);else{const g=ING[id];b.ing.push([id,g.unit==='g'?Math.max(g.step,Math.min(300,g.step*3)):g.step])}const y=$('#sheet').scrollTop;$('#sheet').innerHTML=builderHtml();$('#sheet').scrollTop=y},
+ bQty:el=>{syncBuilderFields();const b=sheetCtx.b,i=Number(el.dataset.i),g=ING[b.ing[i][0]];b.ing[i][1]=Math.max(g.step,Math.round((b.ing[i][1]+Number(el.dataset.d)*g.step)*100)/100);const y=$('#sheet').scrollTop;$('#sheet').innerHTML=builderHtml();$('#sheet').scrollTop=y},
+ bSave:()=>{syncBuilderFields();const b=sheetCtx.b;if(!b.en.trim()){$('#bErr').textContent='Give the dish a name.';return}if(!b.ing.length){$('#bErr').textContent='Pick at least one grocery.';return}
+   const slots=b.cat==='tiffin'?'bd':b.cat==='pachadi'?'bld':'ld';
+   state.custom.push({id:'my-'+Date.now().toString(36),en:b.en.trim(),te:b.te.trim(),cat:b.cat,slots,mins:30,ing:b.ing.map(x=>[x[0],x[1]]),steps:''});commit();closeSheet();toast('Dish saved')},
+};
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]');
+  if(!el){if(e.target.id==='sheetWrap')closeSheet();return}
+  if(el.tagName==='INPUT'&&el.type==='checkbox')return; // handled on change
+  const f=A[el.dataset.act];if(f){e.preventDefault();f(el)}
+});
+document.addEventListener('change',e=>{const el=e.target;if(el.matches('input.tick[data-act="buy"]'))A.buy(el)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#sheetWrap').hidden)closeSheet()});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='pantryQ'){ui.pantryQ=t.value;const pos=t.selectionStart;render();const n=$('#pantryQ');n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}
+  else if(t.id==='dishQ'){ui.dishQ=t.value;$('#dishBody').innerHTML=dishListHtml()}
+  else if(t.id==='pickQ'){sheetCtx.q=t.value;const tmp=document.createElement('div');tmp.innerHTML=pickerHtml();$('#pickList').innerHTML=tmp.querySelector('#pickList').innerHTML}
+});
+
+/* first run: make a starter plan for this week so the tool opens in a working state */
+if(firstRun){autoPlan(mondayOf(new Date()));autoPlan(addDays(mondayOf(new Date()),7));saveLocal()}
+render();
+</script>
+
+</body>
+</html>
