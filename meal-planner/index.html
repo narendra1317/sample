@@ -202,7 +202,18 @@ details.method p{margin:6px 0 0;max-width:65ch}
 .item .why{font-size:12.5px;color:var(--muted)}
 .item .amt{text-align:right;font-size:13px}
 .item .amt b{display:block;font-size:15px}
-.item.got .nm,.item.got .amt b{text-decoration:line-through;color:var(--muted)}
+.item.got .nm{text-decoration:line-through;color:var(--muted)}
+.item .txt,.sug .txt{min-width:0;cursor:pointer}
+.item .why,.sug .why{display:block;font-size:12.5px;color:var(--muted)}
+.item .ctl,.sug .ctl{display:flex;align-items:center;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.item .cost{font-size:13px;color:var(--muted);min-width:44px;text-align:right}
+.rmx{border:0;background:transparent;color:var(--muted);width:28px;height:28px;border-radius:8px;font-size:18px;line-height:1}
+.rmx:hover{background:var(--chilli-soft);color:var(--chilli)}
+.sug{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0}
+.sug+.sug{border-top:1px solid var(--line)}
+.sugbox .store-h{align-items:start}
+.btn:disabled{opacity:.5;cursor:default}
+@media (max-width:620px){.item{grid-template-columns:auto auto minmax(0,1fr)}.item .ctl{grid-column:3/-1;justify-content:flex-start}.sug{grid-template-columns:auto minmax(0,1fr)}.sug .ctl{grid-column:2/-1;justify-content:flex-start}}
 .tick{appearance:none;-webkit-appearance:none;width:24px;height:24px;border:2px solid var(--line);border-radius:7px;background:var(--surface);display:grid;place-items:center;margin:0;cursor:pointer}
 .tick:checked{background:var(--leaf);border-color:var(--leaf)}
 .tick:checked::after{content:"";width:6px;height:11px;border:solid var(--leaf-ink);border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
@@ -497,13 +508,14 @@ function sampleState(){
   put('upmarava',500,20);put('idlirava',800,20);put('tamarind',300,40);put('jaggery',400,40);put('peanuts',300,20);put('sesame',100,40);
   put('curd',800,2);put('ghee',300,30);put('eggs',6,5);put('atta',3000,20);
   const staples={};Object.values(ING).filter(i=>i.staple).forEach(i=>staples[i.id]='full');staples.cumin='low';
-  return {v:1,people:2,inv,staples,plan:{},cooked:{},bought:{},extras:[],custom:[],sample:true,updatedAt:0};
+  return {v:2,people:2,inv,staples,plan:{},cooked:{},bought:{},list:{},skip:{},custom:[],sample:true,updatedAt:0};
 }
 function migrate(s){
   const b=sampleState();
   s=Object.assign({},b,s||{});
-  for(const k of ['inv','staples','plan','cooked','bought']) if(typeof s[k]!=='object'||!s[k]) s[k]={};
-  if(!Array.isArray(s.extras))s.extras=[]; if(!Array.isArray(s.custom))s.custom=[];
+  for(const k of ['inv','staples','plan','cooked','bought','list','skip']) if(typeof s[k]!=='object'||!s[k]||Array.isArray(s[k])) s[k]={};
+  if(Array.isArray(s.extras)){s.extras.forEach(id=>{if(ING[id]&&!s.list[id])s.list[id]=1});delete s.extras}
+  if(!Array.isArray(s.custom))s.custom=[];
   return s;
 }
 function loadLocal(){try{const r=localStorage.getItem(LS);if(r)return migrate(JSON.parse(r))}catch(e){}return null}
@@ -618,16 +630,22 @@ function shopDates(){
   for(let d=new Date(from.getFullYear(),from.getMonth(),from.getDate());d<=to;d=addDays(d,1)){const k=keyOf(d);if(k>=tk)out.push(k)}
   return out;
 }
-function shopList(){
+function mealNeeds(){
   const need={},why={};
   for(const k of shopDates())for(const [s] of SLOTS){if(state.cooked[k+'|'+s])continue;for(const did of peekDay(k)[s]){const d=dishById(did);if(!d)continue;for(const [id,q] of Object.entries(needFor(d))){need[id]=(need[id]||0)+q;(why[id]||(why[id]=new Set())).add(d.en)}}}
   const items=[];
   for(const [id,q] of Object.entries(need)){const g=ING[id];if(!g||g.staple)continue;const short=q-invQ(id);if(short>1e-6){const packs=Math.max(1,Math.ceil(short/g.pack-1e-9));items.push({id,need:q,have:invQ(id),short,packs,cost:packs*g.price,why:[...why[id]]})}}
-  for(const g of Object.values(ING))if(g.staple&&state.staples[g.id]&&state.staples[g.id]!=='full')items.push({id:g.id,staple:true,packs:1,cost:g.price,why:[state.staples[g.id]==='out'?'Run out':'Running low']});
-  for(const id of state.extras)if(ING[id]&&!items.find(x=>x.id===id))items.push({id,extra:true,packs:1,cost:ING[id].price,why:['Added by you']});
   const order=Object.keys(ING);items.sort((a,b)=>order.indexOf(a.id)-order.indexOf(b.id));
   return items;
 }
+/* the shopping list is only what the user adds */
+function myList(){
+  const needs=Object.fromEntries(mealNeeds().map(x=>[x.id,x]));
+  const order=Object.keys(ING);
+  return Object.entries(state.list).filter(([id,n])=>ING[id]&&n>0).map(([id,packs])=>({id,packs,cost:packs*ING[id].price,meal:needs[id]||null})).sort((a,b)=>order.indexOf(a.id)-order.indexOf(b.id));
+}
+function suggestions(){const all=mealNeeds().filter(x=>!state.list[x.id]);return {show:all.filter(x=>!state.skip[x.id]),hidden:all.filter(x=>state.skip[x.id])}}
+const packLabel=(g,packs)=>g.staple?packs+' '+(g.id==='oil'?(packs>1?'bottles':'bottle'):(packs>1?'packs':'pack')):fmtQty(packs*g.pack,g.unit);
 
 /* ============ RENDER ============ */
 const $=s=>document.querySelector(s);
@@ -639,7 +657,7 @@ const TAB_ICONS={
  dishes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/></svg>',
 };
 function renderTabs(){
-  const n=shopList().filter(x=>!state.bought[x.id]).length;
+  const n=myList().filter(x=>!state.bought[x.id]).length;
   const tabs=[['today','Today'],['week','Week'],['shop','Shop'],['pantry','Pantry'],['dishes','Dishes']];
   $('#tabs').innerHTML=tabs.map(([id,l])=>`<button class="tab" data-act="tab" data-id="${id}" ${ui.tab===id?'aria-current="page"':''}>${TAB_ICONS[id]}<span>${l}</span>${id==='shop'&&n?`<span class="badge num">${n}</span>`:''}</button>`).join('');
   $('#peopleN').textContent=state.people;
@@ -669,19 +687,19 @@ function vToday(){
     </section>`}).join('');
   const soon=Object.keys(state.inv).map(id=>({id,f:freshness(id)})).filter(x=>x.f&&x.f.cls!=='ok').sort((a,b)=>a.f.left-b.f.left);
   const soonHtml=soon.length?soon.map(({id,f})=>{const ds=allDishes().filter(d=>d.ing.some(x=>x[0]===id)).slice(0,2).map(d=>d.en).join(', ');return `<div class="soon-item">${icon(id,40)}<div class="grow"><b>${esc(ING[id].en)}</b> <span class="small muted num">${fmtQty(invQ(id),ING[id].unit)}</span><div class="small muted">${esc(ds)}</div></div><span class="pill ${f.cls}">${f.txt}</span></div>`}).join(''):'<p class="small muted">Nothing is close to its best-before. Nice.</p>';
-  const list=shopList(),open=list.filter(x=>!state.bought[x.id]);
+  const open=myList().filter(x=>!state.bought[x.id]);const sugN=(()=>{const u=ui.shop;ui.shop='week';const n=suggestions().show.length;ui.shop=u;return n})();
   return `<div class="section-h"><div><div class="eyebrow">${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}</div><h2>${label}'s cooking</h2></div><div class="row"><button class="btn sm" data-act="dayShift" data-d="-7" aria-label="Previous week">‹ Week</button><button class="btn sm" data-act="goToday">Today</button><button class="btn sm" data-act="dayShift" data-d="7" aria-label="Next week">Week ›</button></div></div>
   ${dayStrip()}
   <div class="today-grid"><div>${meals}</div>
   <aside class="side"><div class="card"><h3>Use these soon</h3>${soonHtml}</div>
-  <div class="card"><h3>Shopping</h3><p class="small muted" style="margin:0 0 10px">${open.length?`${open.length} item${open.length>1?'s':''} to buy for the rest of this week, about <b class="num">${money(open.reduce((a,b)=>a+b.cost,0))}</b>.`:'Everything for this week is in your pantry.'}</p><button class="btn sm" data-act="tab" data-id="shop">Open shopping list</button></div></aside></div>`;
+  <div class="card"><h3>Shopping</h3><p class="small muted" style="margin:0 0 10px">${open.length?`${open.length} item${open.length>1?'s':''} on your list, about <b class="num">${money(open.reduce((a,b)=>a+b.cost,0))}</b>.`:'Your list is empty.'}${sugN?` ${sugN} suggested for this week's meals.`:''}</p><button class="btn sm" data-act="tab" data-id="shop">Open shopping list</button></div></aside></div>`;
 }
 
 function vWeek(){
   const ws=weekStart(),we=addDays(ws,6),tk=todayKey();
   let planned=0,cooked=0;const vegs=new Set();
   for(let i=0;i<7;i++){const k=keyOf(addDays(ws,i)),p=peekDay(k);for(const [s] of SLOTS){if(p[s].length)planned++;if(state.cooked[k+'|'+s])cooked++;p[s].forEach(did=>{const d=dishById(did);if(d)d.ing.forEach(([id])=>{if(ING[id]&&(ING[id].cat==='veg'||ING[id].cat==='leafy')&&!['onion','greenchilli','ginger','garlic','curryleaves','coriander','tomato'].includes(id))vegs.add(id)})})}}
-  const saveUiShop=ui.shop;ui.shop=ui.week===0?'week':ui.week===1?'next':'week';const cost=ui.week<=1?shopList().filter(x=>!state.bought[x.id]).reduce((a,b)=>a+b.cost,0):null;ui.shop=saveUiShop;
+  const saveUiShop=ui.shop;ui.shop=ui.week===0?'week':ui.week===1?'next':'week';const cost=ui.week<=1?mealNeeds().reduce((a,b)=>a+b.cost,0):null;ui.shop=saveUiShop;
   const range=`${ws.getDate()} ${MON[ws.getMonth()]} – ${we.getDate()} ${MON[we.getMonth()]}`;
   let grid=`<div class="week"><div class="corner"></div>${Array.from({length:7},(_,i)=>{const d=addDays(ws,i);return `<div class="wh ${keyOf(d)===tk?'today':''}">${DOW[i]}<b class="num">${d.getDate()}</b></div>`}).join('')}`;
   // desktop: row-major by slot; mobile: per-day groups. Build per-day groups and use CSS order for desktop.
@@ -693,24 +711,43 @@ function vWeek(){
   grid+=cells.map(c=>`<div class="wday"><div class="wday-h"><b>${DOW[c.i]} ${c.d.getDate()}</b>${c.k===tk?'<span class="pill ok">Today</span>':''}</div>${c.html}</div>`).join('')+'</div>';
   return `<div class="section-h"><div><div class="eyebrow">Weekly menu</div><h2>Plan the week</h2><p>Tap + Add to choose dishes for any meal, or let Auto-plan fill the empty slots from your pantry, using up what's close to its best-before first.</p></div></div>
   <div class="week-bar"><button class="btn sm" data-act="week" data-d="-1" aria-label="Previous week">‹</button><span class="range num">${range}</span><button class="btn sm" data-act="week" data-d="1" aria-label="Next week">›</button>${ui.week!==0?'<button class="btn sm" data-act="week" data-d="0">This week</button>':''}<span style="flex:1"></span><button class="btn primary" data-act="auto">✦ Auto-plan empty slots</button><button class="btn warn" data-act="clearWeek" id="clearBtn">Clear week</button></div>
-  <div class="stats"><div class="card stat"><span class="eyebrow">Meals planned</span><b class="num">${planned}/21</b></div><div class="card stat"><span class="eyebrow">Cooked</span><b class="num">${cooked}</b></div><div class="card stat"><span class="eyebrow">Different veg</span><b class="num">${vegs.size}</b></div><div class="card stat"><span class="eyebrow">Still to buy</span><b class="num">${cost==null?'—':money(cost)}</b></div></div>
+  <div class="stats"><div class="card stat"><span class="eyebrow">Meals planned</span><b class="num">${planned}/21</b></div><div class="card stat"><span class="eyebrow">Cooked</span><b class="num">${cooked}</b></div><div class="card stat"><span class="eyebrow">Different veg</span><b class="num">${vegs.size}</b></div><div class="card stat"><span class="eyebrow">Meals still need</span><b class="num">${cost==null?'—':money(cost)}</b></div></div>
   ${grid}`;
 }
 
 function vShop(){
-  const items=shopList(),groups={asian:[],super:[],both:[]};items.forEach(x=>groups[ING[x.id].store].push(x));
+  const items=myList(),groups={asian:[],super:[],both:[]};items.forEach(x=>groups[ING[x.id].store].push(x));
   const open=items.filter(x=>!state.bought[x.id]),got=items.filter(x=>state.bought[x.id]);
-  const row=x=>{const g=ING[x.id],b=!!state.bought[x.id];return `<label class="item ${b?'got':''}"><input type="checkbox" class="tick" data-act="buy" data-id="${x.id}" ${b?'checked':''} aria-label="Bought ${esc(g.en)}">${icon(x.id,40)}<span><span class="nm">${esc(g.en)}</span> <span class="te small">${esc(g.te)}</span><span class="why" style="display:block">${x.staple||x.extra?esc(x.why.join(', ')):'For '+esc(x.why.slice(0,3).join(', '))+(x.why.length>3?' +'+(x.why.length-3):'')}${g.note?' · '+esc(g.note):''}</span></span><span class="amt num"><b>${x.staple?'1 '+(g.id==='oil'?'bottle':'pack'):fmtQty(x.packs*g.pack,g.unit)}</b>${x.staple||x.extra?'':`need ${fmtQty(x.short,g.unit)} · `}${money(x.cost)}</span></label>`};
+  const row=x=>{const g=ING[x.id],b=!!state.bought[x.id];
+    const why=x.meal?'For '+esc(x.meal.why.slice(0,3).join(', '))+(x.meal.why.length>3?' +'+(x.meal.why.length-3):''):(g.note?esc(g.note):'Added by you');
+    return `<div class="item ${b?'got':''}"><input type="checkbox" class="tick" id="b-${x.id}" data-act="buy" data-id="${x.id}" ${b?'checked':''} aria-label="Bought ${esc(g.en)}">${icon(x.id,40)}<label for="b-${x.id}" class="txt"><span class="nm">${esc(g.en)}</span> <span class="te small">${esc(g.te)}</span><span class="why">${why}</span></label>
+    <span class="ctl"><span class="stepper"><button data-act="packs" data-id="${x.id}" data-d="-1" aria-label="${x.packs>1?'Fewer':'Remove'} ${esc(g.en)}">−</button><span>${packLabel(g,x.packs)}</span><button data-act="packs" data-id="${x.id}" data-d="1" aria-label="More ${esc(g.en)}">+</button></span><span class="cost num">${money(x.cost)}</span><button class="rmx" data-act="unlist" data-id="${x.id}" aria-label="Remove ${esc(g.en)} from list">×</button></span></div>`};
   const stores=['asian','super','both'].filter(s=>groups[s].length).map(s=>`<section class="card store"><div class="store-h"><h3>${STORES[s]}</h3><span class="small muted num">${groups[s].filter(x=>!state.bought[x.id]).length} to get · ${money(groups[s].reduce((a,b)=>a+b.cost,0))}</span></div>${groups[s].map(row).join('')}</section>`).join('');
   const total=open.reduce((a,b)=>a+b.cost,0);
-  const dates=shopDates();
-  return `<div class="section-h"><div><div class="eyebrow">Shopping list</div><h2>What to buy</h2><p>Built from meals you haven't cooked yet, minus what's already in your pantry, rounded up to the pack sizes shops sell.</p></div>
-  <div class="chips">${[['week','Rest of this week'],['next','Next week'],['both','Both weeks']].map(([id,l])=>`<button class="chip" data-act="shopRange" data-id="${id}" aria-pressed="${ui.shop===id}">${l}</button>`).join('')}</div></div>
-  <div class="shop-grid"><div>${items.length?stores:`<div class="card empty"><h3>Nothing to buy</h3><p>${dates.length?'Your pantry covers every planned meal in this range.':'No days left in this range.'} Plan more meals in the Week tab, or tap "Add to list" on anything in the Pantry.</p></div>`}</div>
+  const sg=suggestions();
+  const sRow=x=>{const g=ING[x.id];return `<div class="sug">${icon(x.id,40)}<div class="txt"><span class="nm">${esc(g.en)}</span> <span class="te small">${esc(g.te)}</span><span class="why">Need ${fmtQty(x.short,g.unit)} more for ${esc(x.why.slice(0,2).join(', '))}${x.why.length>2?' +'+(x.why.length-2):''}</span></div><span class="ctl"><button class="btn sm primary" data-act="sugAdd" data-id="${x.id}" data-p="${x.packs}">Add ${packLabel(g,x.packs)}</button><button class="btn sm" data-act="sugSkip" data-id="${x.id}">Not needed</button></span></div>`};
+  const sugHtml=`<section class="card store sugbox"><div class="store-h"><div><h3>Suggested for your meals</h3><span class="small muted">What your planned meals need beyond your pantry. Nothing is added unless you tap Add.</span></div>${sg.show.length>1?`<button class="btn sm" data-act="sugAll">Add all ${sg.show.length}</button>`:''}</div>
+    <div class="chips" style="margin:10px 0 4px">${[['week','Rest of this week'],['next','Next week'],['both','Both weeks']].map(([id,l])=>`<button class="chip" data-act="shopRange" data-id="${id}" aria-pressed="${ui.shop===id}">${l}</button>`).join('')}</div>
+    ${sg.show.length?(ui.sugAll?sg.show:sg.show.slice(0,5)).map(sRow).join('')+(sg.show.length>5?`<button class="listbtn" data-act="sugMore" style="margin-top:6px">${ui.sugAll?'Show fewer':'Show all '+sg.show.length+' suggestions'}</button>`:''):`<p class="small muted">${shopDates().length?'Nothing else needed. Your pantry and list cover the planned meals.':'No days left in this range.'}</p>`}
+    ${sg.hidden.length?`<button class="listbtn" data-act="unskip" style="margin-top:6px">Show ${sg.hidden.length} you marked not needed</button>`:''}</section>`;
+  return `<div class="section-h"><div><div class="eyebrow">Shopping list</div><h2>My list</h2><p>Only what you add goes on this list. Add groceries yourself, or pick from the suggestions for your planned meals.</p></div>
+  <button class="btn primary" data-act="addGroceries">+ Add groceries</button></div>
+  <div class="shop-grid"><div>${items.length?stores:`<div class="card empty"><h3>Your list is empty</h3><p>Tap <b>+ Add groceries</b> to choose what you need, or add from the suggestions below.</p></div>`}
+  <div style="margin-top:14px">${sugHtml}</div></div>
   <aside class="card summary"><span class="eyebrow">Estimated spend</span><div class="total num">${money(total)}</div><p class="small muted" style="margin:6px 0 0">${open.length} item${open.length===1?'':'s'} left · ${got.length} in basket. Prices are rough Aberdeen averages.</p>
   <hr><button class="btn primary" data-act="putAway" ${got.length?'':'disabled'} style="width:100%;justify-content:center">Put ${got.length||''} bought item${got.length===1?'':'s'} in pantry</button>
-  <p class="small muted">Tick things off as you shop. When you're home, this adds them to your pantry with today's date.</p>
-  <hr><button class="btn" data-act="copy" style="width:100%;justify-content:center">Copy list for WhatsApp / Notes</button><textarea class="copybox" id="copyBox" readonly hidden aria-label="Shopping list text"></textarea></aside></div>`;
+  <p class="small muted">Tick things off as you shop. When you're home, this adds them to your pantry with today's date and takes them off the list.</p>
+  <hr><button class="btn" data-act="copy" style="width:100%;justify-content:center" ${open.length?'':'disabled'}>Copy list for WhatsApp / Notes</button><textarea class="copybox" id="copyBox" readonly hidden aria-label="Shopping list text"></textarea></aside></div>`;
+}
+function addSheetHtml(){
+  const q=(sheetCtx.q||'').toLowerCase();
+  const n=Object.keys(state.list).length;
+  const groups=Object.keys(CATS).map(c=>{const list=Object.values(ING).filter(g=>g.cat===c&&(!q||g.en.toLowerCase().includes(q)||g.te.includes(sheetCtx.q)||g.note.toLowerCase().includes(q)));if(!list.length)return'';
+    return `<div class="cat-h" style="margin-top:14px"><h3 style="font-size:18px">${CATS[c]}</h3></div><div class="pickers" style="flex-wrap:wrap;overflow:visible;padding:0">${list.map(g=>{const on=!!state.list[g.id];const qn=g.staple?null:invQ(g.id);return `<button class="pickv" data-act="listToggle" data-id="${g.id}" aria-pressed="${on}">${icon(g.id,40)}<span>${esc(g.en)}</span><span class="small muted" style="font-weight:500">${on?'✓ On list':g.staple?(state.staples[g.id]==='full'?'Stocked':state.staples[g.id]==='low'?'Low':'Out'):qn>0?'Have '+fmtQty(qn,g.unit):'None at home'}</span></button>`}).join('')}</div>`}).join('');
+  return `<div class="sheet-h"><div><div class="eyebrow">Shopping list</div><h2>Add groceries</h2><p class="small muted" style="margin:4px 0 0">Tap to add or remove. Change pack counts on the list afterwards.</p></div><button class="close" data-act="closeSheet" aria-label="Close">×</button></div>
+  <input class="search" id="addQ" type="search" placeholder="Search groceries" value="${esc(sheetCtx.q||'')}" aria-label="Search groceries" style="max-width:none">
+  <div id="addBody">${groups||'<div class="empty">No groceries match.</div>'}</div>
+  <div class="row" style="margin-top:14px;justify-content:space-between"><span class="small muted">${n} item${n===1?'':'s'} on your list</span><button class="btn primary" data-act="closeSheet">Done</button></div>`;
 }
 
 function vPantry(){
@@ -719,8 +756,8 @@ function vPantry(){
   const inStock=Object.values(ING).filter(g=>!g.staple&&invQ(g.id)>0).length;
   const soonN=Object.keys(state.inv).filter(id=>{const f=freshness(id);return f&&f.cls!=='ok'}).length;
   const tile=g=>{
-    if(g.staple){const st=state.staples[g.id]||'full';return `<div class="card tile">${`<div class="top-row">${icon(g.id,56)}<div><div class="nm">${esc(g.en)}</div><span class="te">${esc(g.te)}</span></div></div>`}<div class="meta">${g.note?`<span class="note">${esc(g.note)}</span>`:''}</div><div class="seg" role="group" aria-label="${esc(g.en)} level">${['full','low','out'].map(v=>`<button class="${v}" data-act="staple" data-id="${g.id}" data-v="${v}" aria-pressed="${st===v}">${v==='full'?'Stocked':v==='low'?'Low':'Out'}</button>`).join('')}</div></div>`}
-    const qn=invQ(g.id),f=freshness(g.id),onList=state.extras.includes(g.id);
+    if(g.staple){const st=state.staples[g.id]||'full';return `<div class="card tile">${`<div class="top-row">${icon(g.id,56)}<div><div class="nm">${esc(g.en)}</div><span class="te">${esc(g.te)}</span></div></div>`}<div class="meta">${g.note?`<span class="note">${esc(g.note)}</span>`:''}</div><div class="seg" role="group" aria-label="${esc(g.en)} level">${['full','low','out'].map(v=>`<button class="${v}" data-act="staple" data-id="${g.id}" data-v="${v}" aria-pressed="${st===v}">${v==='full'?'Stocked':v==='low'?'Low':'Out'}</button>`).join('')}</div><div class="foot" style="justify-content:flex-end"><button class="listbtn" data-act="extra" data-id="${g.id}" aria-pressed="${!!state.list[g.id]}">${state.list[g.id]?'✓ On list':'+ List'}</button></div></div>`}
+    const qn=invQ(g.id),f=freshness(g.id),onList=!!state.list[g.id];
     return `<div class="card tile ${qn>0?'':'out'}"><div class="top-row">${icon(g.id,56)}<div><div class="nm">${esc(g.en)}</div><span class="te">${esc(g.te)}</span></div></div>
     <div class="meta">${f?`<span class="pill ${f.cls}">${f.txt}</span>`:''}<span class="pill plain">${STORES[g.store]}</span></div>
     <div class="foot"><div class="stepper"><button data-act="qty" data-id="${g.id}" data-d="-1" aria-label="Less ${esc(g.en)}">−</button><span>${qn>0?fmtQty(qn,g.unit):'None'}</span><button data-act="qty" data-id="${g.id}" data-d="1" aria-label="More ${esc(g.en)}">+</button></div><button class="listbtn" data-act="extra" data-id="${g.id}" aria-pressed="${onList}">${onList?'✓ On list':'+ List'}</button></div></div>`};
@@ -794,7 +831,7 @@ const A={
  tab:el=>{ui.tab=el.dataset.id;saveUi();closeSheet();render();window.scrollTo({top:0})},
  people:el=>{state.people=Math.min(12,Math.max(1,state.people+Number(el.dataset.d)));commit({keepSample:true})},
  sampleKeep:()=>{state.sample=false;commit()},
- sampleClear:()=>{state.inv={};state.plan={};state.cooked={};state.bought={};state.extras=[];Object.keys(state.staples).forEach(k=>state.staples[k]='full');state.sample=false;commit();toast('Pantry and plan cleared')},
+ sampleClear:()=>{state.inv={};state.plan={};state.cooked={};state.bought={};state.list={};state.skip={};Object.keys(state.staples).forEach(k=>state.staples[k]='full');state.sample=false;commit();toast('Pantry and plan cleared')},
  pickDay:el=>{ui.day=el.dataset.k;render()},
  goToday:()=>{ui.day=todayKey();render()},
  dayShift:el=>{ui.day=keyOf(addDays(parseKey(ui.day),Number(el.dataset.d)));render()},
@@ -815,19 +852,28 @@ const A={
    clearArmed=false;const ws=weekStart(),tk=todayKey();for(let i=0;i<7;i++){const k=keyOf(addDays(ws,i));if(k<tk)continue;if(state.plan[k])SLOTS.forEach(([s])=>{if(!state.cooked[k+'|'+s])state.plan[k][s]=[]})}commit();toast('Upcoming meals cleared')},
  shopRange:el=>{ui.shop=el.dataset.id;saveUi();render()},
  buy:el=>{const id=el.dataset.id;if(el.checked)state.bought[id]=true;else delete state.bought[id];commit({keepSample:true})},
- putAway:()=>{const items=shopList();let n=0;for(const x of items){if(!state.bought[x.id])continue;const g=ING[x.id];if(g.staple)state.staples[g.id]='full';else addStock(x.id,x.packs*g.pack);state.extras=state.extras.filter(e=>e!==x.id);n++}state.bought={};commit();toast(`${n} item${n===1?'':'s'} added to pantry`)},
+ putAway:()=>{let n=0;for(const x of myList()){if(!state.bought[x.id])continue;const g=ING[x.id];if(g.staple)state.staples[g.id]='full';else addStock(x.id,x.packs*g.pack);delete state.list[x.id];n++}state.bought={};commit();toast(`${n} item${n===1?'':'s'} added to pantry`)},
+ packs:el=>{const id=el.dataset.id,n=(state.list[id]||0)+Number(el.dataset.d);if(n<=0){delete state.list[id];delete state.bought[id]}else state.list[id]=n;commit()},
+ unlist:el=>{const id=el.dataset.id;delete state.list[id];delete state.bought[id];commit();toast(`${ING[id].en} removed from list`)},
+ sugAdd:el=>{state.list[el.dataset.id]=Number(el.dataset.p)||1;commit();toast(`${ING[el.dataset.id].en} added to list`)},
+ sugAll:()=>{const sh=suggestions().show;sh.forEach(x=>state.list[x.id]=x.packs);commit();toast(`${sh.length} items added to list`)},
+ sugMore:()=>{ui.sugAll=!ui.sugAll;render()},
+ sugSkip:el=>{state.skip[el.dataset.id]=true;commit()},
+ unskip:()=>{state.skip={};commit()},
+ addGroceries:()=>{openSheet('',{add:true,q:''});$('#sheet').innerHTML=addSheetHtml()},
+ listToggle:el=>{const id=el.dataset.id;if(state.list[id]){delete state.list[id];delete state.bought[id]}else{state.list[id]=1;delete state.skip[id]}commit({keepSample:true});const y=$('#sheet').scrollTop;$('#sheet').innerHTML=addSheetHtml();$('#sheet').scrollTop=y},
  copy:()=>{
-   const items=shopList().filter(x=>!state.bought[x.id]);const by={asian:[],super:[],both:[]};items.forEach(x=>by[ING[x.id].store].push(x));
+   const items=myList().filter(x=>!state.bought[x.id]);const by={asian:[],super:[],both:[]};items.forEach(x=>by[ING[x.id].store].push(x));
    let txt=`Vantillu shopping list · ${new Date().getDate()} ${MON[new Date().getMonth()]}\n`;
-   for(const s of ['asian','super','both'])if(by[s].length){txt+=`\n${STORES[s].toUpperCase()}\n`+by[s].map(x=>{const g=ING[x.id];return `☐ ${g.en} (${g.te}) — ${x.staple?'1 pack':fmtQty(x.packs*g.pack,g.unit)}`}).join('\n')+'\n'}
+   for(const s of ['asian','super','both'])if(by[s].length){txt+=`\n${STORES[s].toUpperCase()}\n`+by[s].map(x=>{const g=ING[x.id];return `☐ ${g.en} (${g.te}) — ${packLabel(g,x.packs)}`}).join('\n')+'\n'}
    txt+=`\nApprox. ${money(items.reduce((a,b)=>a+b.cost,0))}`;
    const box=$('#copyBox');box.value=txt;
    const fallback=()=>{box.hidden=false;box.focus();box.select();toast('Select all and copy the list below')};
    try{navigator.clipboard.writeText(txt).then(()=>toast('Shopping list copied'),fallback)}catch(e){fallback()}
  },
  qty:el=>{const g=ING[el.dataset.id],d=Number(el.dataset.d);setQ(g.id,invQ(g.id)+d*g.step);commit()},
- staple:el=>{state.staples[el.dataset.id]=el.dataset.v;commit()},
- extra:el=>{const id=el.dataset.id;state.extras=state.extras.includes(id)?state.extras.filter(x=>x!==id):state.extras.concat(id);commit();toast(state.extras.includes(id)?`${ING[id].en} added to shopping list`:`${ING[id].en} removed from list`)},
+ staple:el=>{const id=el.dataset.id,v=el.dataset.v;state.staples[id]=v;commit();if(v!=='full'&&!state.list[id])toast(`Marked ${v}. Tap + List if you want to buy it`)},
+ extra:el=>{const id=el.dataset.id;if(state.list[id]){delete state.list[id];delete state.bought[id]}else{state.list[id]=1;delete state.skip[id]}commit();toast(state.list[id]?`${ING[id].en} added to shopping list`:`${ING[id].en} removed from list`)},
  pantryCat:el=>{ui.pantryCat=el.dataset.id;render()},
  dishCat:el=>{ui.dishCat=el.dataset.id;render()},
  pickIng:el=>{const id=el.dataset.id;ui.pickIngs=ui.pickIngs.includes(id)?ui.pickIngs.filter(x=>x!==id):ui.pickIngs.concat(id);render()},
@@ -854,6 +900,7 @@ document.addEventListener('input',e=>{
   const t=e.target;
   if(t.id==='pantryQ'){ui.pantryQ=t.value;const pos=t.selectionStart;render();const n=$('#pantryQ');n.focus();try{n.setSelectionRange(pos,pos)}catch(_){}}
   else if(t.id==='dishQ'){ui.dishQ=t.value;$('#dishBody').innerHTML=dishListHtml()}
+  else if(t.id==='addQ'){sheetCtx.q=t.value;const tmp=document.createElement('div');tmp.innerHTML=addSheetHtml();$('#addBody').innerHTML=tmp.querySelector('#addBody').innerHTML}
   else if(t.id==='pickQ'){sheetCtx.q=t.value;const tmp=document.createElement('div');tmp.innerHTML=pickerHtml();$('#pickList').innerHTML=tmp.querySelector('#pickList').innerHTML}
 });
 
