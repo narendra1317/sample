@@ -1,0 +1,21 @@
+{
+  "name": "keel",
+  "version": "1.0.0",
+  "description": "Keel — integrated EPC project controls: CPM scheduling, weekly timesheets, earned value, risk and delivery tracking.",
+  "type": "module",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "seed": "node server/index.js --reset-demo --seed-only",
+    "test": "node --test test/*.test.js",
+    "build:demo": "node scripts/build-demo.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  }
+}
