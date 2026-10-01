@@ -29,3 +29,20 @@ const html = fs.readFileSync(path.join(root, 'public/index.html'), 'utf8')
 const file = path.join(out, 'keel-demo.html');
 fs.writeFileSync(file, html);
 console.log(`Wrote ${path.relative(root, file)} (${Math.round(html.length / 1024)} KB)`);
+
+// Embeddable variant (no document wrapper, opens signed in as the demo PM)
+// for hosts that supply their own <html>/<head>/<body>, e.g. Claude artifacts.
+if (process.argv.includes('--embed')) {
+  const embed = html
+    .replace(/<!doctype html>\s*/i, '')
+    .replace(/<html[^>]*>\s*/i, '')
+    .replace(/<\/html>\s*/i, '')
+    .replace(/<\/?head>\s*/gi, '')
+    .replace(/<\/?body>\s*/gi, '')
+    .replace(/<meta charset="utf-8" \/>\s*/i, '')
+    .replace(/<meta name="viewport"[^>]*>\s*/i, '')
+    .replace("window.KEEL_MODE = 'demo';", "window.KEEL_MODE = 'demo'; window.KEEL_AUTOLOGIN = 'pm@demo.keel';");
+  const ef = path.join(out, 'keel-embed.html');
+  fs.writeFileSync(ef, embed);
+  console.log(`Wrote ${path.relative(root, ef)} (${Math.round(embed.length / 1024)} KB)`);
+}

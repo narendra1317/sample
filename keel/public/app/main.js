@@ -178,6 +178,15 @@ async function start() {
     /* ignore */
   }
   app.api = await initApi();
+  // Hosted demos can open straight into a working view (window.KEEL_AUTOLOGIN = 'pm@demo.keel').
+  if (app.api.mode === 'demo' && globalThis.KEEL_AUTOLOGIN && !app.api.signedIn) {
+    try {
+      await app.api.login(globalThis.KEEL_AUTOLOGIN);
+      if (!location.hash || location.hash === '#/') location.hash = '#/portfolio';
+    } catch {
+      /* fall back to the role picker */
+    }
+  }
   window.addEventListener('hashchange', render);
   window.addEventListener('keel:signed-out', () => {
     if (!app.boot) return;
