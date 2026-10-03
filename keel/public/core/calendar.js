@@ -43,6 +43,7 @@ export class WorkCalendar {
 
   /** Number of working days strictly before point p (since the calendar base). */
   index(p) {
+    if (!Number.isFinite(p)) throw new Error('Scheduling error: a date could not be calculated (check logic and constraints)');
     if (p < BASE) throw new Error('Date is before 1990 and outside the supported range');
     if (p - BASE >= this.cum.length - 1) this.extendTo(p + 400);
     return this.cum[p - BASE];

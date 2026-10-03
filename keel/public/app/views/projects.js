@@ -92,6 +92,13 @@ export async function importDialog(app) {
     await app.refreshBoot();
     const c = r.created[0];
     toast(`Imported ${c.code}: ${c.activities} activities, ${c.relationships} relationships`);
+    if (c.warnings?.length) {
+      await modal({
+        title: `Imported ${c.code} — please review`,
+        body: `<p>${c.activities} activities, ${c.relationships} relationships and ${c.resources} resources were imported.</p>${c.warnings.map((w) => `<div class="callout warn" style="margin-top:8px">${esc(w)}</div>`).join('')}`,
+        actions: [{ label: 'Open schedule', primary: true, value: true }],
+      });
+    }
     location.hash = `#/p/${c.id}/schedule`;
   }
 }

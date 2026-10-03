@@ -111,3 +111,15 @@ test('level of effort spans its logic without driving it', () => {
   assert.equal(s.byId.get('loe').finish, '2026-10-16');
   assert.equal(s.byId.get('b').start, '2026-10-12');
 });
+
+test('in-progress activity whose only successors are SS links still gets a late finish', () => {
+  const s = schedule({
+    project: { ...project, dataDate: '2026-10-14' },
+    activities: [A('a', 10, { actualStart: '2026-10-05', pctComplete: 30 }), A('b', 5), A('c', 3)],
+    relationships: [R('a', 'b', 'SS', 2), R('b', 'c')],
+  });
+  const a = s.byId.get('a');
+  assert.ok(Number.isFinite(a.lf));
+  assert.ok(a.tf !== null && Number.isFinite(a.tf));
+  assert.equal(s.byId.get('c').tf, 0);
+});

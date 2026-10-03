@@ -200,6 +200,8 @@ export function schedule({ project, activities, relationships = [], calendars = 
         remStart = startReq;
         r.driving = startDrv;
       }
+      const resume = toDay(a.resume);
+      if (resume !== null && resume > remStart) remStart = resume; // remaining work resumes no earlier than this (MS Project "Resume")
       remStart = cal.nextWork(Math.max(remStart, r.es));
       r.remStart = remStart;
       r.ef = cal.finishFrom(remStart, dur);
@@ -324,7 +326,9 @@ export function schedule({ project, activities, relationships = [], calendars = 
       }
       if (v < lf) lf = v;
     }
-    if (!hasSucc) lf = lateTarget;
+    // No successors, or only start-side links on work that has already started
+    // (those are satisfied): the late finish falls back to the project target.
+    if (!hasSucc || lf === Infinity) lf = lateTarget;
 
     const cType = a.constraintType || '';
     const cDay = toDay(a.constraintDate);

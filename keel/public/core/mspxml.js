@@ -46,12 +46,34 @@ export function durHours(s) {
 const MSP_CSTR = { 0: '', 1: 'ALAP', 2: 'MSO', 3: 'MFO', 4: 'SNET', 5: 'SNLT', 6: 'FNET', 7: 'FNLT' };
 const MSP_REL = { 0: 'FF', 1: 'FS', 2: 'SF', 3: 'SS' };
 
+function projectCode(title) {
+  const words = String(title || 'MSP').replace(/\.xml$/i, '').split(/[^A-Za-z0-9]+/).filter(Boolean);
+  const code = words.map((w) => (/^\d+$/.test(w) ? w : w[0] + w.slice(1).replace(/\D/g, ''))).join('').toUpperCase();
+  return (code.length >= 2 ? code : words.join('').toUpperCase()).slice(0, 12) || 'MSP';
+}
+
 export function mspXmlToBundle(xml) {
   const doc = parseXml(xml);
   const proj = kid(doc, 'Project');
   if (!proj) throw new Error('Not an MS Project XML file: <Project> element missing');
   const minutesPerDay = Number(val(proj, 'MinutesPerDay')) || 480;
   const hpd = minutesPerDay / 60;
+  const dayStart = (val(proj, 'DefaultStartTime') || '08:00:00').split(':').map(Number);
+  const isStartOfDay = (iso) => {
+    const m = /T(\d\d):(\d\d)/.exec(iso || '');
+    return !!m && Number(m[1]) * 60 + Number(m[2]) <= dayStart[0] * 60 + (dayStart[1] || 0);
+  };
+  // Remaining work that resumes part-way through a day still occupies that day:
+  // count working hours already gone on the resume day, then round up to whole days.
+  const remainingDays = (remHours, resumeIso) => {
+    let offset = 0;
+    const m = /T(\d\d):(\d\d)/.exec(resumeIso || '');
+    if (m) {
+      const mins = Number(m[1]) * 60 + Number(m[2]) - (dayStart[0] * 60 + (dayStart[1] || 0));
+      offset = Math.max(0, Math.min(hpd, mins / 60 - (Number(m[1]) >= 13 ? 1 : 0)));
+    }
+    return remHours > 0 ? Math.ceil((offset + remHours) / hpd - 1e-6) : 0;
+  };
 
   const calendars = kids(kid(proj, 'Calendars'), 'Calendar')
     .filter((c) => val(c, 'IsBaseCalendar') !== '0')
@@ -99,9 +121,11 @@ export function mspXmlToBundle(xml) {
       code: val(t, 'WBS') || `A${val(t, 'ID')}`,
       name: val(t, 'Name'),
       wbsId: parent,
-      type: milestone ? 'finish-milestone' : 'task',
+      // a milestone at the start of the working day (e.g. 08:00, or with a start constraint) is a start milestone
+      type: milestone ? (isStartOfDay(val(t, 'Start')) || ['SNET', 'SNLT', 'MSO'].includes(cType) ? 'start-milestone' : 'finish-milestone') : 'task',
       duration: Math.round(hours / hpd),
-      remaining: aStart && !aFinish ? Math.round(durHours(val(t, 'RemainingDuration')) / hpd) : undefined,
+      remaining: aStart && !aFinish ? remainingDays(durHours(val(t, 'RemainingDuration')), val(t, 'Resume')) : undefined,
+      resume: aStart && !aFinish && val(t, 'Resume') ? val(t, 'Resume').slice(0, 10) : undefined,
       constraintType: cType,
       constraintDate: cType && cType !== 'ALAP' ? val(t, 'ConstraintDate').slice(0, 10) || null : null,
       actualStart: aStart ? aStart.slice(0, 10) : null,
@@ -143,12 +167,33 @@ export function mspXmlToBundle(xml) {
     }))
     .filter((a) => actIds.has(a.activityId) && resIds.has(a.resourceId));
 
+  // Without a Status Date the plan has not been statused: MS Project leaves
+  // unfinished work where it was. Use a data date no later than the earliest
+  // activity so Keel reproduces MS Project's dates, and tell the user.
+  const warnings = [];
+  const statusDate = val(proj, 'StatusDate').slice(0, 10);
+  let dataDate = statusDate;
+  if (!dataDate || dataDate === 'NA') {
+    const starts = [val(proj, 'StartDate').slice(0, 10), ...activities.map((a) => a.actualStart).filter(Boolean)].filter(Boolean).sort();
+    dataDate = starts[0];
+    warnings.push(`The file has no Status Date, so progress has not been statused in MS Project. Keel has kept MS Project's dates by setting the data date to ${dataDate}. To status the schedule, set the data date in Project settings or use Close period.`);
+  }
+  const startedNoProgress = activities.filter((a) => a.actualStart && !a.actualFinish && !Number(a.pctComplete)).length;
+  if (startedNoProgress) warnings.push(`${startedNoProgress} task(s) have an actual start but 0% complete.`);
+
+  // MS Project schedules constrained tasks before the project start date; widen the window to match.
+  const earliestConstraint = activities.map((a) => a.constraintDate).filter(Boolean).sort()[0];
+  const projectStart = [val(proj, 'StartDate').slice(0, 10), dataDate, earliestConstraint].filter(Boolean).sort()[0];
+
   return {
+    warnings,
     project: {
-      code: (val(proj, 'Name') || 'MSP').replace(/\.xml$/i, '').slice(0, 20),
+      code: projectCode(val(proj, 'Title') || val(proj, 'Name')),
       name: val(proj, 'Title') || val(proj, 'Name') || 'Imported MS Project plan',
-      startDate: val(proj, 'StartDate').slice(0, 10),
-      dataDate: (val(proj, 'StatusDate') || val(proj, 'CurrentDate') || val(proj, 'StartDate')).slice(0, 10),
+      startDate: projectStart,
+      dataDate,
+      // MS Project lets started tasks run on regardless of links (progress override)
+      progressMode: 'override',
       mustFinishBy: val(proj, 'ScheduleFromStart') === '0' ? val(proj, 'FinishDate').slice(0, 10) : null,
       calendarId: projectCal ? `msp-cal-${projectCal}` : 'default',
       source: 'Microsoft Project (XML)',

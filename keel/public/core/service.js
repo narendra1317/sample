@@ -48,7 +48,7 @@ const SCHEMAS = {
   activities: {
     projectId: 's', wbsId: 's', code: 's', name: 's', type: 'e:task|start-milestone|finish-milestone|loe', duration: 'n', remaining: 'n',
     calendarId: 's', constraintType: 'e:|SNET|SNLT|FNET|FNLT|MSO|MFO|ALAP', constraintDate: 'd', actualStart: 'd', actualFinish: 'd',
-    pctComplete: 'n', progressMethod: 'e:physical|duration|steps|units|register', steps: 'a', budgetCost: 'n', actualCost: 'n',
+    resume: 'd', pctComplete: 'n', progressMethod: 'e:physical|duration|steps|units|register', steps: 'a', budgetCost: 'n', actualCost: 'n',
     optimistic: 'n', pessimistic: 'n', discipline: 's', phase: 'e:|E|P|C|CS|PM', notes: 's', priority: 'n', area: 's', system: 's',
   },
   relationships: { projectId: 's', predId: 's', succId: 's', type: 'e:FS|SS|FF|SF', lag: 'n' },
@@ -492,7 +492,15 @@ export function createService({ db, now = () => new Date(), newId = defaultId, h
       for (const r of b.relationships) db.relationships.push({ ...r, id: newId('rel'), predId: idMap.get(r.predId), succId: idMap.get(r.succId), projectId: p.id });
       for (const a of b.assignments) db.assignments.push({ ...a, id: newId('asg'), activityId: idMap.get(a.activityId), resourceId: idMap.get(a.resourceId), projectId: p.id });
       audit(user, 'import', 'projects', p.id, `${p.code} from ${p.source}: ${b.activities.length} activities, ${b.relationships.length} relationships`);
-      created.push({ id: p.id, code: p.code, name: p.name, activities: b.activities.length, relationships: b.relationships.length, resources: (b.resources || []).length });
+      // fail fast: an imported schedule that cannot be calculated is rolled back
+      try {
+        schedule({ project: p, activities: db.activities.filter((a) => a.projectId === p.id), relationships: db.relationships.filter((r) => r.projectId === p.id), calendars: db.calendars });
+      } catch (e) {
+        for (const c of ['wbs', 'activities', 'relationships', 'assignments']) db[c] = db[c].filter((x) => x.projectId !== p.id);
+        db.projects = db.projects.filter((x) => x.id !== p.id);
+        throw bad(`The file was read but its schedule could not be calculated: ${e.message}`);
+      }
+      created.push({ id: p.id, code: p.code, name: p.name, activities: b.activities.length, relationships: b.relationships.length, resources: (b.resources || []).length, warnings: b.warnings || [] });
     }
     return { created };
   }

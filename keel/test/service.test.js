@@ -8,6 +8,7 @@ import { bundleToMspXml, mspXmlToBundle } from '../public/core/mspxml.js';
 import { simulate } from '../public/core/montecarlo.js';
 import { dcmaAssessment } from '../public/core/dcma.js';
 import { level } from '../public/core/levelling.js';
+import { schedule } from '../public/core/cpm.js';
 import { buildCalendars } from '../public/core/calendar.js';
 
 const fresh = () => {
@@ -195,4 +196,39 @@ test('levelling never exceeds a resource limit when it can be avoided', () => {
     }));
     for (const h of days.values()) assert.ok(h <= Math.max(lim, singles) + 1e-6, `${rid} ${h} > ${lim}`);
   }
+});
+
+test('MS Project file without a status date reproduces MS Project dates', () => {
+  // Synthetic file covering what real MSP exports contain: no StatusDate, an in-progress
+  // task resuming mid-day whose only successor is SS, a start-of-day milestone with SNET
+  // before the project start date, and a lag in tenths of a minute.
+  const task = (uid, name, extra) => `<Task><UID>${uid}</UID><ID>${uid}</ID><Name> ${name}</Name><WBS>1.${uid}</WBS><OutlineLevel>1</OutlineLevel><Summary>0</Summary>${extra}</Task>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?><Project xmlns="http://schemas.microsoft.com/project">
+    <Name>Test Plan v2.xml</Name><Title>Test Plan v2</Title><StartDate>2026-09-14T08:00:00</StartDate><CurrentDate>2026-10-03T08:00:00</CurrentDate>
+    <MinutesPerDay>480</MinutesPerDay><DefaultStartTime>08:00:00</DefaultStartTime><CalendarUID>1</CalendarUID>
+    <Calendars><Calendar><UID>1</UID><Name>Standard</Name><IsBaseCalendar>1</IsBaseCalendar><WeekDays>
+      <WeekDay><DayType>1</DayType><DayWorking>0</DayWorking></WeekDay><WeekDay><DayType>2</DayType><DayWorking>1</DayWorking></WeekDay><WeekDay><DayType>3</DayType><DayWorking>1</DayWorking></WeekDay><WeekDay><DayType>4</DayType><DayWorking>1</DayWorking></WeekDay><WeekDay><DayType>5</DayType><DayWorking>1</DayWorking></WeekDay><WeekDay><DayType>6</DayType><DayWorking>1</DayWorking></WeekDay><WeekDay><DayType>7</DayType><DayWorking>0</DayWorking></WeekDay>
+    </WeekDays></Calendar></Calendars>
+    <Tasks>
+      ${task(1, 'Bid evaluation', '<Duration>PT168H0M0S</Duration><Start>2026-08-07T08:00:00</Start><ActualStart>2026-08-07T08:00:00</ActualStart><RemainingDuration>PT52H4M48S</RemainingDuration><Resume>2026-08-27T11:55:12</Resume><PercentComplete>69</PercentComplete>')}
+      ${task(2, 'Design', '<Duration>PT80H0M0S</Duration><PredecessorLink><PredecessorUID>1</PredecessorUID><Type>3</Type><LinkLag>4800</LinkLag><LagFormat>7</LagFormat></PredecessorLink>')}
+      ${task(3, 'Kick-off', '<Milestone>1</Milestone><Duration>PT0H0M0S</Duration><Start>2026-09-02T08:00:00</Start><ConstraintType>4</ConstraintType><ConstraintDate>2026-09-02T08:00:00</ConstraintDate>')}
+    </Tasks></Project>`;
+  const b = mspXmlToBundle(xml);
+  assert.equal(b.project.code, 'TPV2');
+  assert.equal(b.project.dataDate, '2026-08-07');
+  assert.equal(b.project.startDate, '2026-08-07');
+  assert.equal(b.project.progressMode, 'override');
+  assert.match(b.warnings[0], /no Status Date/);
+  const a1 = b.activities.find((a) => a.code === '1.1');
+  assert.equal(a1.name, 'Bid evaluation');
+  assert.equal(a1.remaining, 7);
+  assert.equal(a1.resume, '2026-08-27');
+  assert.equal(b.activities.find((a) => a.code === '1.3').type, 'start-milestone');
+  const s = schedule({ project: b.project, activities: b.activities, relationships: b.relationships, calendars: b.calendars });
+  const by = (code) => s.byId.get(b.activities.find((a) => a.code === code).id);
+  assert.equal(by('1.1').finish, '2026-09-04'); // as MS Project: resume 27-Aug 11:55 + 52.1 h
+  assert.equal(by('1.2').start, '2026-08-10'); // SS + 1 day (LinkLag 4800 = tenths of a minute) from Fri 7-Aug
+  assert.equal(by('1.3').start, '2026-09-02');
+  assert.ok(Number.isFinite(by('1.1').tf));
 });
