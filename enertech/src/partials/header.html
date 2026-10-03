@@ -1,0 +1,65 @@
+<div class="utility-bar">
+  <div class="container">
+    <span class="utility-bar__badge utility-bar__hide-sm">ISO 9001:2015 certified · Est. 2014</span>
+    <ul class="utility-bar__list">
+      <li><a href="tel:+441224025383">{{icon:phone}}<span>+44 (0)1224 025 383</span></a></li>
+      <li class="utility-bar__hide-xs"><a href="mailto:info@enertechsynergies.com">{{icon:mail}}<span>info@enertechsynergies.com</span></a></li>
+      <li class="utility-bar__hide-sm"><a href="{{root}}careers.html">Careers</a></li>
+    </ul>
+  </div>
+</div>
+
+<header class="site-header" data-header>
+  <div class="container">
+    <a class="brand" href="{{root}}index.html" aria-label="EnerTech Synergies home">
+      <img src="{{root}}assets/logos/enertech-logo.webp" alt="EnerTech Synergies" width="520" height="120">
+    </a>
+
+    <button class="nav-toggle" type="button" aria-controls="site-nav" aria-expanded="false" data-nav-open>
+      {{icon:menu}}<span class="sr-only">Open menu</span>
+    </button>
+
+    <nav class="nav" id="site-nav" aria-label="Main" data-nav>
+      <button class="nav-toggle nav__close" type="button" data-nav-close>{{icon:close}}<span class="sr-only">Close menu</span></button>
+      <ul class="nav__list">
+        <li class="nav__item" data-dropdown>
+          <button class="nav__link{{sectorsActiveClass}}" type="button" aria-expanded="false" aria-controls="dd-sectors">Sectors {{icon:chevron-down}}</button>
+          <div class="dropdown dropdown--mega" id="dd-sectors">
+            <ul class="dropdown__grid">
+              <li><a class="dropdown__link" href="{{root}}sectors/oil-and-gas.html">{{icon:rig}}<div><strong>Oil &amp; Gas</strong><span>Brownfield, repair orders, decommissioning, decarbonisation</span></div></a></li>
+              <li><a class="dropdown__link" href="{{root}}sectors/energy-transition.html">{{icon:leaf}}<div><strong>Energy Transition</strong><span>Hydrogen, carbon capture, air to energy, offshore wind</span></div></a></li>
+              <li><a class="dropdown__link" href="{{root}}sectors/digital-transformation.html">{{icon:chip}}<div><strong>Digital Transformation</strong><span>Asset integrity, structural twins, RFID compliance, AI for HSE</span></div></a></li>
+              <li><a class="dropdown__link" href="{{root}}sectors/infrastructure.html">{{icon:building}}<div><strong>Infrastructure</strong><span>Civil, structural &amp; environmental engineering onshore</span></div></a></li>
+              <li><a class="dropdown__link" href="{{root}}sectors/laser-scanning.html">{{icon:scan}}<div><strong>Laser Scanning &amp; 3D</strong><span>NavVis VLX capture, point clouds, as-built models</span></div></a></li>
+              <li><a class="dropdown__link" href="{{root}}sectors/workforce-solutions.html">{{icon:users}}<div><strong>Workforce Solutions</strong><span>Skilled engineers &amp; designers, short or long term</span></div></a></li>
+            </ul>
+            <div class="dropdown__feature blueprint">
+              <div>
+                <p class="eyebrow">From concept to decommissioning</p>
+                <h3>One multidisciplinary team across the full asset lifecycle.</h3>
+              </div>
+              <a class="btn btn--light" href="{{root}}sectors/index.html">All sectors {{icon:arrow-right}}</a>
+            </div>
+          </div>
+        </li>
+        <li class="nav__item"><a class="nav__link" href="{{root}}capabilities.html"{{active:capabilities}}>Capabilities</a></li>
+        <li class="nav__item"><a class="nav__link" href="{{root}}projects.html"{{active:projects}}>Projects</a></li>
+        <li class="nav__item" data-dropdown>
+          <button class="nav__link{{aboutActiveClass}}" type="button" aria-expanded="false" aria-controls="dd-about">Company {{icon:chevron-down}}</button>
+          <div class="dropdown dropdown--simple" id="dd-about">
+            <ul class="dropdown__simple-list">
+              <li><a href="{{root}}about.html">About EnerTech</a></li>
+              <li><a href="{{root}}about.html#values">Our values</a></li>
+              <li><a href="{{root}}about.html#team">Leadership &amp; team</a></li>
+              <li><a href="{{root}}sustainability.html">Sustainability &amp; community</a></li>
+              <li><a href="{{root}}careers.html">Careers</a></li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav__item"><a class="nav__link" href="{{root}}news.html"{{active:news}}>News</a></li>
+      </ul>
+      <a class="btn btn--primary nav__cta" href="{{root}}contact.html">Talk to an engineer {{icon:arrow-right}}</a>
+    </nav>
+    <div class="nav-backdrop" data-nav-close></div>
+  </div>
+</header>

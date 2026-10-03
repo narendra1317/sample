@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en-GB" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{fullTitle}}</title>
+  <meta name="description" content="{{description}}">
+  <link rel="canonical" href="{{canonical}}">
+  <meta name="theme-color" content="#0e1440">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="EnerTech Synergies">
+  <meta property="og:title" content="{{fullTitle}}">
+  <meta property="og:description" content="{{description}}">
+  <meta property="og:url" content="{{canonical}}">
+  <meta property="og:image" content="{{ogImage}}">
+  <meta property="og:locale" content="en_GB">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" href="{{root}}assets/logos/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{{root}}assets/css/styles.css">
+  <script>document.documentElement.classList.replace('no-js', 'js');</script>
+  <script src="{{root}}assets/js/main.js" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "EnerTech Synergies Ltd",
+    "url": "https://www.enertechsynergies.com/",
+    "logo": "https://www.enertechsynergies.com/assets/logos/enertech-logo.png",
+    "email": "info@enertechsynergies.com",
+    "telephone": "+44 1224 025383",
+    "foundingDate": "2014",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "2nd Floor, Hill of Rubislaw, Anderson Drive",
+      "addressLocality": "Aberdeen",
+      "postalCode": "AB15 6BL",
+      "addressCountry": "GB"
+    }
+  }
+  </script>
+</head>
+<body class="{{bodyClass}}">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <!-- @include header -->
+  <main id="main">
+{{content}}
+  </main>
+  <!-- @include footer -->
+</body>
+</html>

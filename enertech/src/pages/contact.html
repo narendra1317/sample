@@ -1,0 +1,85 @@
+<!--meta {"title":"Contact","description":"Contact EnerTech Synergies at Hill of Rubislaw, Anderson Drive, Aberdeen AB15 6BL. Call +44 (0)1224 025 383 or email info@enertechsynergies.com.","nav":"contact"} -->
+
+<section class="page-hero blueprint">
+  <div class="container">
+    <ol class="breadcrumb"><li><a href="{{root}}index.html">Home</a></li><li aria-current="page">Contact</li></ol>
+    <p class="eyebrow">Contact</p>
+    <h1>Let's talk about your project.</h1>
+    <p>Whether you have a defined scope, an early-stage idea or an urgent problem offshore, our engineers are ready to help. We work flexibly, but there's nothing like meeting face to face, so come and see us in Aberdeen.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container contact-grid">
+    <div>
+      <ul class="contact-details">
+        <li>{{icon:phone}}<div><span class="k">Phone</span><a href="tel:+441224025383">+44 (0)1224 025 383</a></div></li>
+        <li>{{icon:mail}}<div><span class="k">Email</span><a href="mailto:info@enertechsynergies.com">info@enertechsynergies.com</a></div></li>
+        <li>{{icon:pin}}<div><span class="k">Office</span>2nd Floor, Hill of Rubislaw<br>Anderson Drive, Aberdeen AB15 6BL<br>United Kingdom</div></li>
+      </ul>
+      <div class="map-frame">
+        <iframe title="Map showing EnerTech Synergies at Hill of Rubislaw, Aberdeen" src="https://www.google.com/maps?q=Hill+of+Rubislaw,+Anderson+Drive,+Aberdeen+AB15+6BL&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h2 style="font-size:1.6rem">Send an enquiry</h2>
+      <p style="color:var(--muted)">Tell us a little about what you need and the right engineer will get back to you.</p>
+      <form action="{{root}}contact.php" method="post" novalidate data-contact-form>
+        <div class="form-grid">
+          <div class="field" data-validate>
+            <label for="f-name">Full name</label>
+            <input id="f-name" name="name" type="text" autocomplete="name" required maxlength="120">
+            <p class="error-msg">Please enter your name.</p>
+          </div>
+          <div class="field">
+            <label for="f-company">Company <span class="opt">(optional)</span></label>
+            <input id="f-company" name="company" type="text" autocomplete="organization" maxlength="160">
+          </div>
+          <div class="field" data-validate>
+            <label for="f-email">Email</label>
+            <input id="f-email" name="email" type="email" autocomplete="email" required maxlength="200">
+            <p class="error-msg">Please enter a valid email address.</p>
+          </div>
+          <div class="field" data-validate>
+            <label for="f-phone">Phone</label>
+            <input id="f-phone" name="phone" type="tel" autocomplete="tel" required pattern="[0-9+()\-\s]{7,20}" maxlength="20">
+            <p class="error-msg">Please enter a phone number.</p>
+          </div>
+          <div class="field full">
+            <label for="f-topic">Enquiry type <span class="opt">(optional)</span></label>
+            <select id="f-topic" name="topic">
+              <option value="">Select…</option>
+              <option>Oil &amp; Gas</option>
+              <option>Energy Transition</option>
+              <option>Digital Transformation</option>
+              <option>Infrastructure</option>
+              <option>Laser Scanning &amp; 3D</option>
+              <option>Workforce Solutions</option>
+              <option>Careers</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="field full" data-validate>
+            <label for="f-message">How can we help?</label>
+            <textarea id="f-message" name="message" required minlength="10" maxlength="5000"></textarea>
+            <p class="error-msg">Please tell us a little about your enquiry.</p>
+          </div>
+          <div class="hp-field" aria-hidden="true">
+            <label for="f-website">Website</label>
+            <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+          <div class="field full" data-validate>
+            <label class="consent"><input type="checkbox" name="consent" value="yes" required> <span>I agree to EnerTech Synergies storing my details to respond to this enquiry, in line with the <a href="https://www.enertechsynergies.com/privacy-policy.php">privacy policy</a>.</span></label>
+            <p class="error-msg">Please confirm you're happy for us to contact you.</p>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:24px">
+          <button class="btn btn--primary" type="submit">Send enquiry {{icon:arrow-right}}</button>
+        </div>
+        <div class="form-status" role="status" aria-live="polite" data-form-status></div>
+        <p class="form-footnote">Prefer email? Write to <a href="mailto:info@enertechsynergies.com">info@enertechsynergies.com</a>.</p>
+      </form>
+    </div>
+  </div>
+</section>
