@@ -20,7 +20,8 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = dirname(fileURLToPath(import.meta.url));
 const SRC = join(ROOT, 'src');
-const OUT = join(ROOT, 'site');
+const PREVIEW = process.env.PREVIEW === '1';
+const OUT = process.env.OUT_DIR || join(ROOT, 'site');
 const SITE_URL = 'https://www.enertechsynergies.com';
 
 const ICONS = {
@@ -81,6 +82,26 @@ function render(tpl, vars, depth = 0) {
 
 const pages = walk(join(SRC, 'pages'));
 let count = 0;
+
+/* Preview build for the hosted review link: adds a banner, disconnects the
+   form, swaps the map embed for a link, and (for the entry page) strips the
+   document skeleton, which the host adds itself. */
+function toPreview(html, rel) {
+  html = html.replace('<a class="skip-link" href="#main">Skip to content</a>',
+    '<a class="skip-link" href="#main">Skip to content</a>\n  <div class="preview-banner"><strong>Design preview</strong> for internal review · not the live EnerTech Synergies website</div>');
+  html = html.replace('data-contact-form>', 'data-contact-form data-preview>');
+  html = html.replace(/<iframe title="Map[^>]*><\/iframe>/,
+    '<a class="map-link" href="https://www.google.com/maps/search/?api=1&amp;query=Hill+of+Rubislaw+Anderson+Drive+Aberdeen+AB15+6BL" target="_blank" rel="noopener"><strong>Hill of Rubislaw, Aberdeen</strong><span>Open in Google Maps →</span></a>');
+  if (rel === 'index.html') {
+    html = html
+      .replace(/<title>[^<]*<\/title>/, '<title>EnerTech Website Redesign</title>')
+      .replace(/^<!doctype html>\s*<html[^>]*>\s*<head>\s*/i, '')
+      .replace(/<meta charset="utf-8">\s*<meta name="viewport"[^>]*>\s*/, '')
+      .replace(/<\/head>\s*<body[^>]*>/, '')
+      .replace(/<\/body>\s*<\/html>\s*$/, '');
+  }
+  return html;
+}
 for (const file of pages) {
   const raw = readFileSync(file, 'utf8');
   const m = raw.match(/^<!--meta\s*([\s\S]*?)-->\s*/);
@@ -105,8 +126,10 @@ for (const file of pages) {
   vars.fullTitle = meta.title === 'Home'
     ? 'EnerTech Synergies | Multidisciplinary Engineering Consultancy, Aberdeen'
     : `${meta.title} | EnerTech Synergies`;
+  if (PREVIEW && rel === '404.html') continue;
   vars.content = render(body, vars);
-  const html = render(partial('layout'), vars);
+  let html = render(partial('layout'), vars);
+  if (PREVIEW) html = toPreview(html, rel);
   const out = join(OUT, rel);
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, html);

@@ -57,17 +57,22 @@
     else if (nav && nav.classList.contains('is-open')) setNav(false);
   });
 
-  /* Reveal on scroll */
+  /* Reveal on scroll: only elements that start below the fold animate in;
+     everything in the first screen is visible immediately. */
   const revealEls = $$('.reveal, .lifecycle__stage');
   if ('IntersectionObserver' in window && !reduceMotion) {
     const io = new IntersectionObserver((entries) => {
       entries.forEach((en) => {
         if (!en.isIntersecting) return;
+        en.target.classList.remove('is-pending');
         en.target.classList.add('is-visible');
         io.unobserve(en.target);
       });
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    revealEls.forEach((el) => io.observe(el));
+    revealEls.forEach((el) => {
+      if (el.getBoundingClientRect().top > window.innerHeight) el.classList.add('is-pending');
+      io.observe(el);
+    });
   } else {
     revealEls.forEach((el) => el.classList.add('is-visible'));
   }
@@ -147,6 +152,12 @@
       e.preventDefault();
       const invalid = fields.filter((f) => !validate(f));
       if (invalid.length) { $('input, select, textarea', invalid[0]).focus(); return; }
+      if (form.hasAttribute('data-preview')) {
+        status.className = 'form-status is-success';
+        status.textContent = 'Design preview: this form is not connected yet. On the live site, enquiries are emailed to info@enertechsynergies.com.';
+        status.setAttribute('tabindex', '-1'); status.focus();
+        return;
+      }
       const btn = $('button[type="submit"]', form);
       const label = btn.innerHTML;
       btn.disabled = true; btn.textContent = 'Sending…';
